@@ -12,17 +12,17 @@ contract TOFUTokenDecimals is ITOFUTokenDecimals {
     /// @inheritdoc ITOFUTokenDecimals
     function decimalsForTokenReadOnly(address token) external view returns (TOFUOutcome, uint8) {
         // slither-disable-next-line unused-return
-        return LibTOFUTokenDecimals.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        return LibTOFUTokenDecimals.decimalsForTokenReadOnlyImplementation(sTOFUTokenDecimals, token);
     }
 
     /// @inheritdoc ITOFUTokenDecimals
     function decimalsForToken(address token) external returns (TOFUOutcome, uint8) {
         // slither-disable-next-line unused-return
-        return LibTOFUTokenDecimals.decimalsForToken(sTOFUTokenDecimals, token);
+        return LibTOFUTokenDecimals.decimalsForTokenImplementation(sTOFUTokenDecimals, token);
     }
 
     /// @inheritdoc ITOFUTokenDecimals
     function safeDecimalsForToken(address token) external returns (uint8) {
-        return LibTOFUTokenDecimals.safeDecimalsForToken(sTOFUTokenDecimals, token);
+        return LibTOFUTokenDecimals.safeDecimalsForTokenImplementation(sTOFUTokenDecimals, token);
     }
 }

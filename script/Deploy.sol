@@ -6,7 +6,6 @@ import {Script, console2} from "forge-std/Script.sol";
 import {TOFUTokenDecimals} from "../src/concrete/TOFUTokenDecimals.sol";
 
 contract Deploy is Script {
-
     function deployZoltu() internal returns (address deployedAddress) {
         //slither-disable-next-line too-many-digits
         bytes memory code = type(TOFUTokenDecimals).creationCode;

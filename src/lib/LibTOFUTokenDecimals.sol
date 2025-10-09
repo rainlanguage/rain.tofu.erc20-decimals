@@ -21,7 +21,9 @@ struct TOFUTokenDecimalsResult {
 bytes constant TOFU_DECIMALS_SELECTOR = hex"313ce567";
 
 library LibTOFUTokenDecimals {
-    function decimalsForTokenReadOnly(
+    address constant TOFU_DECIMALS_ADDRESS = 0x4f1C29FAAB7EDdF8D7794695d8259996734Cc665;
+
+    function decimalsForTokenReadOnlyImplementation(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
         address token
@@ -79,11 +81,12 @@ library LibTOFUTokenDecimals {
     /// If the stored value is inconsistent with the token's decimals we return
     /// the stored value and TOFUOUTCOME.Inconsistent.
     // forge-lint: disable-next-line(mixed-case-variable)
-    function decimalsForToken(mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals, address token)
-        internal
-        returns (TOFUOutcome, uint8)
-    {
-        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+    function decimalsForTokenImplementation(
+        mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
+        address token
+    ) internal returns (TOFUOutcome, uint8) {
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            decimalsForTokenReadOnlyImplementation(sTOFUTokenDecimals, token);
 
         if (tofuOutcome == TOFUOutcome.Initial) {
             sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: readDecimals});
@@ -97,11 +100,11 @@ library LibTOFUTokenDecimals {
     /// never considered inconsistent.
     /// @return The token's decimals.
     // forge-lint: disable-next-line(mixed-case-variable)
-    function safeDecimalsForToken(mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals, address token)
-        internal
-        returns (uint8)
-    {
-        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForToken(sTOFUTokenDecimals, token);
+    function safeDecimalsForTokenImplementation(
+        mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
+        address token
+    ) internal returns (uint8) {
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForTokenImplementation(sTOFUTokenDecimals, token);
         if (tofuOutcome != TOFUOutcome.Consistent && tofuOutcome != TOFUOutcome.Initial) {
             revert TokenDecimalsReadFailure(token, tofuOutcome);
         }
