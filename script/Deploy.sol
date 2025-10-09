@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Script} from "forge-std/Script.sol";
+import {Script, console2} from "forge-std/Script.sol";
 import {TOFUTokenDecimals} from "../src/concrete/TOFUTokenDecimals.sol";
 
 contract Deploy is Script {
 
-    function deployZoltu() internal {
+    function deployZoltu() internal returns (address deployedAddress) {
         //slither-disable-next-line too-many-digits
         bytes memory code = type(TOFUTokenDecimals).creationCode;
         bool success;
@@ -28,7 +28,8 @@ contract Deploy is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        deployZoltu();
+        address deployedAddress = deployZoltu();
+        console2.log("Deployed TOFUTokenDecimals to:", deployedAddress);
 
         // new TOFUTokenDecimals();
 
