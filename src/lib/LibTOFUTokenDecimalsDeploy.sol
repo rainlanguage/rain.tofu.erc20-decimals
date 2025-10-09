@@ -17,5 +17,8 @@ library LibTOFUTokenDecimalsDeploy {
         if (!success) {
             revert("TOFUTokenDecimals: deploy failed");
         }
+        if (deployedAddress == address(0)) {
+            revert("TOFUTokenDecimals: deployed to zero address");
+        }
     }
 }
