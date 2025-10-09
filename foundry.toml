@@ -1,0 +1,33 @@
+[profile.default]
+src = 'src'
+out = 'out'
+libs = ['lib']
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
+
+solc = "0.8.25"
+evm_version = "paris"
+
+# optimizer settings for debugging
+# via_ir = false
+# optimizer = false
+# optimizer_runs = 0
+# optimizer_steps = 0
+
+# optimizer settings for snapshotting.
+optimizer = true
+# this is a bit low, was set to 1000000 previously but this caused deployment
+# code size cap to be hit.
+optimizer_runs = 1000
+
+bytecode_hash = "none"
+cbor_metadata = false
+
+# Build metadata used for testing rain meta aware contracts in this folder rather
+# than expose ffi to forge.
+fs_permissions = [
+]
+
+remappings = [
+]
+
