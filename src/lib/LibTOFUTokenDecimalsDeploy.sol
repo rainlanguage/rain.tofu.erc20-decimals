@@ -15,7 +15,7 @@ library LibTOFUTokenDecimalsDeploy {
             deployedAddress := mload(0)
         }
         if (!success) {
-            revert("DecimalFloat: deploy failed");
+            revert("TOFUTokenDecimals: deploy failed");
         }
     }
 }
