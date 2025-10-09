@@ -6,6 +6,21 @@ import {Script} from "forge-std/Script.sol";
 import {TOFUTokenDecimals} from "../src/concrete/TOFUTokenDecimals.sol";
 
 contract Deploy is Script {
+
+    function deployZoltu() internal {
+        //slither-disable-next-line too-many-digits
+        bytes memory code = type(TOFUTokenDecimals).creationCode;
+        bool success;
+        assembly ("memory-safe") {
+            mstore(0, 0)
+            success := call(gas(), 0x7A0D94F55792C434d74a40883C6ed8545E406D12, 0, add(code, 0x20), mload(code), 12, 20)
+            deployedAddress := mload(0)
+        }
+        if (!success) {
+            revert("DecimalFloat: deploy failed");
+        }
+    }
+
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYMENT_KEY");
 
@@ -13,7 +28,9 @@ contract Deploy is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        new TOFUTokenDecimals();
+        deployZoltu();
+
+        // new TOFUTokenDecimals();
 
         // container.writeZoltu();
 
