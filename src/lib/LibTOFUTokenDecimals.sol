@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {TOFUOutcome, TokenDecimalsReadFailure} from "../interface/ITOFUTokenDecimals.sol";
+import {TOFUOutcome, ITOFUTokenDecimals, TokenDecimalsReadFailure} from "../interface/ITOFUTokenDecimals.sol";
 
 /// Encodes the token's decimals for a token. Includes a bool to indicate if
 /// the token's decimals have been read from the external contract before. This
@@ -21,7 +21,20 @@ struct TOFUTokenDecimalsResult {
 bytes constant TOFU_DECIMALS_SELECTOR = hex"313ce567";
 
 library LibTOFUTokenDecimals {
-    address constant TOFU_DECIMALS_ADDRESS = 0x4f1C29FAAB7EDdF8D7794695d8259996734Cc665;
+    ITOFUTokenDecimals constant TOFU_DECIMALS_DEPLOYMENT =
+        ITOFUTokenDecimals(0x4f1C29FAAB7EDdF8D7794695d8259996734Cc665);
+
+    function decimalsForTokenReadOnly(address token) internal view returns (TOFUOutcome, uint8) {
+        return TOFU_DECIMALS_DEPLOYMENT.decimalsForTokenReadOnly(token);
+    }
+
+    function decimalsForToken(address token) internal returns (TOFUOutcome, uint8) {
+        return TOFU_DECIMALS_DEPLOYMENT.decimalsForToken(token);
+    }
+
+    function safeDecimalsForToken(address token) internal returns (uint8) {
+        return TOFU_DECIMALS_DEPLOYMENT.safeDecimalsForToken(token);
+    }
 
     function decimalsForTokenReadOnlyImplementation(
         // forge-lint: disable-next-line(mixed-case-variable)
@@ -80,8 +93,8 @@ library LibTOFUTokenDecimals {
     ///
     /// If the stored value is inconsistent with the token's decimals we return
     /// the stored value and TOFUOUTCOME.Inconsistent.
-    // forge-lint: disable-next-line(mixed-case-variable)
     function decimalsForTokenImplementation(
+        // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
         address token
     ) internal returns (TOFUOutcome, uint8) {
@@ -101,6 +114,7 @@ library LibTOFUTokenDecimals {
     /// @return The token's decimals.
     // forge-lint: disable-next-line(mixed-case-variable)
     function safeDecimalsForTokenImplementation(
+        // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
         address token
     ) internal returns (uint8) {
