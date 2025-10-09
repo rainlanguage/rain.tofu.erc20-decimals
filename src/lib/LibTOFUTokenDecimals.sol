@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: LicenseRef-DCL-1.0
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.25;
 
-/// Thrown when a TOFU decimals read fails during deposit.
-/// @param token The token that failed to read decimals.
-/// @param tofuOutcome The outcome of the TOFU read.
-error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
+import {TOFUOutcome, TokenDecimalsReadFailure} from "../interface/ITOFUTokenDecimals.sol";
 
 /// Encodes the token's decimals for a token. Includes a bool to indicate if
 /// the token's decimals have been read from the external contract before. This
@@ -18,17 +15,6 @@ error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
 struct TOFUTokenDecimalsResult {
     bool initialized;
     uint8 tokenDecimals;
-}
-
-enum TOFUOutcome {
-    /// Token's decimals have not been read from the external contract before.
-    Initial,
-    /// Token's decimals are consistent with the stored value.
-    Consistent,
-    /// Token's decimals are inconsistent with the stored value.
-    Inconsistent,
-    /// Token's decimals could not be read from the external contract.
-    ReadFailure
 }
 
 /// @dev The selector for the `decimals()` function in the ERC20 standard.
@@ -46,9 +32,9 @@ library LibTOFUTokenDecimals {
         // success but fails to deserialize to the target type. We need to handle
         // all errors as read failures so that the calling context can decide
         // whether to revert the current transaction or continue with the stored
-        // value. E.g. withdrawals will prefer to continue than trap funds, and
-        // deposits will prefer to revert and prevent new funds entering the
-        // DEX.
+        // value. E.g. withdrawals if a vault may prefer to continue than trap
+        // funds, while deposits may prefer to revert and prevent new funds
+        // entering the vault.
         //slither-disable-start low-level-calls
         //slither-disable-start calls-loop
         (bool success, bytes memory returnData) = token.staticcall(TOFU_DECIMALS_SELECTOR);
