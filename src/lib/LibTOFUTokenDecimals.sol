@@ -15,7 +15,7 @@ error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
 /// external contract before.
 /// @param tokenDecimals The token's decimals.
 // forge-lint: disable-next-line(pascal-case-struct)
-struct TOFUTokenDecimals {
+struct TOFUTokenDecimalsResult {
     bool initialized;
     uint8 tokenDecimals;
 }
@@ -35,13 +35,12 @@ enum TOFUOutcome {
 bytes constant TOFU_DECIMALS_SELECTOR = hex"313ce567";
 
 library LibTOFUTokenDecimals {
-    // forge-lint: disable-next-line(mixed-case-variable)
-    function decimalsForTokenReadOnly(mapping(address => TOFUTokenDecimals) storage sTOFUTokenDecimals, address token)
-        internal
-        view
-        returns (TOFUOutcome, uint8)
-    {
-        TOFUTokenDecimals memory tofuTokenDecimals = sTOFUTokenDecimals[token];
+    function decimalsForTokenReadOnly(
+        // forge-lint: disable-next-line(mixed-case-variable)
+        mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
+        address token
+    ) internal view returns (TOFUOutcome, uint8) {
+        TOFUTokenDecimalsResult memory tofuTokenDecimals = sTOFUTokenDecimals[token];
 
         // The default solidity try/catch logic will error if the return is a
         // success but fails to deserialize to the target type. We need to handle
@@ -94,14 +93,14 @@ library LibTOFUTokenDecimals {
     /// If the stored value is inconsistent with the token's decimals we return
     /// the stored value and TOFUOUTCOME.Inconsistent.
     // forge-lint: disable-next-line(mixed-case-variable)
-    function decimalsForToken(mapping(address => TOFUTokenDecimals) storage sTOFUTokenDecimals, address token)
+    function decimalsForToken(mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals, address token)
         internal
         returns (TOFUOutcome, uint8)
     {
         (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
 
         if (tofuOutcome == TOFUOutcome.Initial) {
-            sTOFUTokenDecimals[token] = TOFUTokenDecimals({initialized: true, tokenDecimals: readDecimals});
+            sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: readDecimals});
         }
         return (tofuOutcome, readDecimals);
     }
@@ -112,7 +111,7 @@ library LibTOFUTokenDecimals {
     /// never considered inconsistent.
     /// @return The token's decimals.
     // forge-lint: disable-next-line(mixed-case-variable)
-    function safeDecimalsForToken(mapping(address => TOFUTokenDecimals) storage sTOFUTokenDecimals, address token)
+    function safeDecimalsForToken(mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals, address token)
         internal
         returns (uint8)
     {
