@@ -22,7 +22,7 @@ bytes constant TOFU_DECIMALS_SELECTOR = hex"313ce567";
 
 library LibTOFUTokenDecimals {
     ITOFUTokenDecimals constant TOFU_DECIMALS_DEPLOYMENT =
-        ITOFUTokenDecimals(0x4f1C29FAAB7EDdF8D7794695d8259996734Cc665);
+        ITOFUTokenDecimals(0xF66761F6b5F58202998D6Cd944C81b22Dc6d4f1E);
 
     function decimalsForTokenReadOnly(address token) internal view returns (TOFUOutcome, uint8) {
         return TOFU_DECIMALS_DEPLOYMENT.decimalsForTokenReadOnly(token);
