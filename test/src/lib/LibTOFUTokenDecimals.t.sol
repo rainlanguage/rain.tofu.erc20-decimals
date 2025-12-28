@@ -8,7 +8,7 @@ import {Test} from "forge-std/Test.sol";
 
 contract LibTOFUTokenDecimalsTest is Test {
     function testDeployAddress() external {
-        vm.createSelectFork("https://eth.llamarpc.com");
+        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
         address deployedAddress = LibTOFUTokenDecimalsDeploy.deployZoltu();
         assertEq(deployedAddress, address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
     }
