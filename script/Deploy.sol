@@ -17,6 +17,7 @@ contract Deploy is Script {
             deployerPrivateKey,
             type(TOFUTokenDecimals).creationCode,
             address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT),
+            LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CODE_HASH,
             new address[](0)
         );
     }
