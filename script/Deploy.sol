@@ -3,17 +3,20 @@
 pragma solidity =0.8.25;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {LibTOFUTokenDecimalsDeploy} from "../src/lib/LibTOFUTokenDecimalsDeploy.sol";
+import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
+import {TOFUTokenDecimals} from "../src/concrete/TOFUTokenDecimals.sol";
+import {LibTOFUTokenDecimals} from "../src/lib/LibTOFUTokenDecimals.sol";
 
 contract Deploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYMENT_KEY");
 
-        vm.startBroadcast(deployerPrivateKey);
-
-        address deployedAddress = LibTOFUTokenDecimalsDeploy.deployZoltu();
-        console2.log("Deployed TOFUTokenDecimals to:", deployedAddress);
-
-        vm.stopBroadcast();
+        LibRainDeploy.deployAndBroadcastToSupportedNetworks(
+            vm,
+            deployerPrivateKey,
+            type(TOFUTokenDecimals).creationCode,
+            address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT),
+            new address[](0)
+        );
     }
 }
