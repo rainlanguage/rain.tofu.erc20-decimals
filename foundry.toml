@@ -37,7 +37,7 @@ flare = "${CI_DEPLOY_FLARE_RPC_URL}"
 matic = "${CI_DEPLOY_MATIC_RPC_URL}"
 
 [etherscan]
-arbitrum-one = "${CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY}"
-base = "${CI_DEPLOY_BASE_ETHERSCAN_API_KEY}"
-flare = "${CI_DEPLOY_FLARE_SNOWTRACE_API_KEY}"
-matic = "${CI_DEPLOY_MATIC_POLYGONSCAN_API_KEY}"
+arbitrum-one = { key = "${CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY}" }
+base = { key = "${CI_DEPLOY_BASE_ETHERSCAN_API_KEY}" }
+flare = { key = "${CI_DEPLOY_FLARE_SNOWTRACE_API_KEY}" }
+matic = { key = "${CI_DEPLOY_MATIC_POLYGONSCAN_API_KEY}" }
