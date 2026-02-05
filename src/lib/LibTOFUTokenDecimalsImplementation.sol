@@ -13,6 +13,16 @@ library LibTOFUTokenDecimalsImplementation {
     /// @dev The selector for the `decimals()` function in the ERC20 standard.
     bytes constant TOFU_DECIMALS_SELECTOR = hex"313ce567";
 
+    /// As per `ITOFUTokenDecimals.decimalsForTokenReadOnly`. Works as
+    /// `decimalsForToken` but does not store any state, simply checking for
+    /// consistency if we have a stored value.
+    /// @param sTOFUTokenDecimals The storage mapping of token addresses to
+    /// TOFUTokenDecimalsResult structs that will be used to track the initial
+    /// reads of token decimals and allows consistency checks on subsequent
+    /// reads.
+    /// @param token The token to read the decimals for.
+    /// @return tofuOutcome The outcome of the TOFU read.
+    /// @return tokenDecimals The token's decimals.
     function decimalsForTokenReadOnly(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
@@ -63,13 +73,13 @@ library LibTOFUTokenDecimalsImplementation {
     /// it anyway to convert to floating point numbers.
     ///
     /// If we have nothing stored we read from the token, store and return it
-    /// with TOFUOUTCOME.Initial.
+    /// with TOFUOutcome.Initial.
     ///
     /// If the call to `decimals` is not a success that deserializes cleanly to
-    /// a `uint8` we return the stored value and TOFUOUTCOME.ReadFailure.
+    /// a `uint8` we return the stored value and TOFUOutcome.ReadFailure.
     ///
     /// If the stored value is inconsistent with the token's decimals we return
-    /// the stored value and TOFUOUTCOME.Inconsistent.
+    /// the stored value and TOFUOutcome.Inconsistent.
     function decimalsForToken(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,

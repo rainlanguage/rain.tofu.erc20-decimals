@@ -6,6 +6,11 @@ import {ITOFUTokenDecimals, TOFUTokenDecimalsResult} from "../interface/ITOFUTok
 import {TOFUOutcome, LibTOFUTokenDecimals} from "../lib/LibTOFUTokenDecimals.sol";
 import {LibTOFUTokenDecimalsImplementation} from "../lib/LibTOFUTokenDecimalsImplementation.sol";
 
+/// @title TOFUTokenDecimals
+/// Minimal implementation of the ITOFUTokenDecimals interface using
+/// LibTOFUTokenDecimalsImplementation for the logic. The concrete contract
+/// simply stores the mapping of token addresses to TOFUTokenDecimalsResult
+/// structs and delegates all logic to the library.
 contract TOFUTokenDecimals is ITOFUTokenDecimals {
     // forge-lint: disable-next-line(mixed-case-variable)
     mapping(address token => TOFUTokenDecimalsResult tofuTokenDecimals) internal sTOFUTokenDecimals;
