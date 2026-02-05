@@ -13,6 +13,7 @@ contract Deploy is Script {
 
         LibRainDeploy.deployAndBroadcastToSupportedNetworks(
             vm,
+            LibRainDeploy.supportedNetworks(),
             deployerPrivateKey,
             type(TOFUTokenDecimals).creationCode,
             address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT),
