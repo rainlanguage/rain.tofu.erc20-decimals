@@ -16,6 +16,7 @@ contract Deploy is Script {
             LibRainDeploy.supportedNetworks(),
             deployerPrivateKey,
             type(TOFUTokenDecimals).creationCode,
+            "src/concrete/TOFUTokenDecimals.sol:TOFUTokenDecimals",
             address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT),
             LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CODE_HASH,
             new address[](0)
