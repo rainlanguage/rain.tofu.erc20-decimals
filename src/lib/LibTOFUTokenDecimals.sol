@@ -40,12 +40,16 @@ library LibTOFUTokenDecimals {
     /// As per `ITOFUTokenDecimals.decimalsForTokenReadOnly`.
     function decimalsForTokenReadOnly(address token) internal view returns (TOFUOutcome, uint8) {
         ensureDeployed();
+        // false positive in slither.
+        // slither-disable-next-line unused-return
         return TOFU_DECIMALS_DEPLOYMENT.decimalsForTokenReadOnly(token);
     }
 
     /// As per `ITOFUTokenDecimals.decimalsForToken`.
     function decimalsForToken(address token) internal returns (TOFUOutcome, uint8) {
         ensureDeployed();
+        // false positive in slither.
+        // slither-disable-next-line unused-return
         return TOFU_DECIMALS_DEPLOYMENT.decimalsForToken(token);
     }
 
