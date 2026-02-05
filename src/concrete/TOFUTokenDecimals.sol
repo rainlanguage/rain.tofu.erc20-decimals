@@ -2,8 +2,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {ITOFUTokenDecimals} from "../interface/ITOFUTokenDecimals.sol";
-import {TOFUOutcome, TOFUTokenDecimalsResult, LibTOFUTokenDecimals} from "../lib/LibTOFUTokenDecimals.sol";
+import {ITOFUTokenDecimals, TOFUTokenDecimalsResult} from "../interface/ITOFUTokenDecimals.sol";
+import {TOFUOutcome, LibTOFUTokenDecimals} from "../lib/LibTOFUTokenDecimals.sol";
+import {LibTOFUTokenDecimalsImplementation} from "../lib/LibTOFUTokenDecimalsImplementation.sol";
 
 contract TOFUTokenDecimals is ITOFUTokenDecimals {
     // forge-lint: disable-next-line(mixed-case-variable)
@@ -12,17 +13,17 @@ contract TOFUTokenDecimals is ITOFUTokenDecimals {
     /// @inheritdoc ITOFUTokenDecimals
     function decimalsForTokenReadOnly(address token) external view returns (TOFUOutcome, uint8) {
         // slither-disable-next-line unused-return
-        return LibTOFUTokenDecimals.decimalsForTokenReadOnlyImplementation(sTOFUTokenDecimals, token);
+        return LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
     }
 
     /// @inheritdoc ITOFUTokenDecimals
     function decimalsForToken(address token) external returns (TOFUOutcome, uint8) {
         // slither-disable-next-line unused-return
-        return LibTOFUTokenDecimals.decimalsForTokenImplementation(sTOFUTokenDecimals, token);
+        return LibTOFUTokenDecimalsImplementation.decimalsForToken(sTOFUTokenDecimals, token);
     }
 
     /// @inheritdoc ITOFUTokenDecimals
     function safeDecimalsForToken(address token) external returns (uint8) {
-        return LibTOFUTokenDecimals.safeDecimalsForTokenImplementation(sTOFUTokenDecimals, token);
+        return LibTOFUTokenDecimalsImplementation.safeDecimalsForToken(sTOFUTokenDecimals, token);
     }
 }

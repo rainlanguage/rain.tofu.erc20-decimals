@@ -2,6 +2,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
+/// Encodes the token's decimals for a token. Includes a bool to indicate if
+/// the token's decimals have been read from the external contract before. This
+/// guards against the default `0` value for unset storage data being
+/// misinterpreted as a valid token decimal value `0`.
+/// @param initialized True if the token's decimals have been read from the
+/// external contract before.
+/// @param tokenDecimals The token's decimals.
+// forge-lint: disable-next-line(pascal-case-struct)
+struct TOFUTokenDecimalsResult {
+    bool initialized;
+    uint8 tokenDecimals;
+}
+
 enum TOFUOutcome {
     /// Token's decimals have not been read from the external contract before.
     Initial,
