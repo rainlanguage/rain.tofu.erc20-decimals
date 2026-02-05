@@ -27,5 +27,6 @@ fs_permissions = [
 ]
 
 remappings = [
+    "rain.deploy/=lib/rain.deploy/src/",
 ]
 
