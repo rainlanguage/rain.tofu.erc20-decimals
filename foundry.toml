@@ -30,3 +30,14 @@ remappings = [
     "rain.deploy/=lib/rain.deploy/src/",
 ]
 
+[rpc_endpoints]
+arbitrum-one = "${CI_DEPLOY_ARBITRUM_RPC_URL}"
+base = "${CI_DEPLOY_BASE_RPC_URL}"
+flare = "${CI_DEPLOY_FLARE_RPC_URL}"
+matic = "${CI_DEPLOY_MATIC_RPC_URL}"
+
+[etherscan]
+arbitrum-one = "${CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY}"
+base = "${CI_DEPLOY_BASE_ETHERSCAN_API_KEY}"
+flare = "${CI_DEPLOY_FLARE_SNOWTRACE_API_KEY}"
+matic = "${CI_DEPLOY_MATIC_POLYGONSCAN_API_KEY}"
