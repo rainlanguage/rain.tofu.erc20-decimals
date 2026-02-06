@@ -28,6 +28,10 @@ library LibTOFUTokenDecimals {
     ITOFUTokenDecimals constant TOFU_DECIMALS_DEPLOYMENT =
         ITOFUTokenDecimals(0x8b40CC241745D8eAB9396EDC12401Cfa1D5940c9);
 
+    /// The expected code hash of the deployed TOFUTokenDecimals contract. This
+    /// is used to verify that the contract at the expected address is indeed the
+    /// correct contract, providing an additional layer of safety against
+    /// misconfiguration or malicious interference.
     bytes32 constant TOFU_DECIMALS_EXPECTED_CODE_HASH =
         0x535e6c51d2ca2fe0bc29f8c0897fe88abe4ce78f7d522ff4b9f9272c26f27b1c;
 
@@ -35,7 +39,10 @@ library LibTOFUTokenDecimals {
     /// explicit guard prevents silent call failures and gives a clear error
     /// message for easier debugging.
     function ensureDeployed() internal view {
-        if (address(TOFU_DECIMALS_DEPLOYMENT).code.length == 0) {
+        if (
+            address(TOFU_DECIMALS_DEPLOYMENT).code.length == 0
+                || address(TOFU_DECIMALS_DEPLOYMENT).codehash != TOFU_DECIMALS_EXPECTED_CODE_HASH
+        ) {
             revert TOFUTokenDecimalsNotDeployed(address(TOFU_DECIMALS_DEPLOYMENT));
         }
     }
