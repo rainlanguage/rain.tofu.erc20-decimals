@@ -10,7 +10,7 @@ import {
 } from "src/lib/LibTOFUTokenDecimalsImplementation.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
 
-contract LibTOFUDecimalsImplementationDecimalsForTokenReadOnlyTest is Test {
+contract LibTOFUTokenDecimalsImplementationDecimalsForTokenReadOnlyTest is Test {
     mapping(address => TOFUTokenDecimalsResult) internal sTOFUTokenDecimals;
 
     function testDecimalsForTokenReadOnlyAddressZero(uint8 storedDecimals) external {
