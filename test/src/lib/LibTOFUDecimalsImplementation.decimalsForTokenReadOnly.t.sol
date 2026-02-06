@@ -41,8 +41,10 @@ contract LibTOFUDecimalsImplementationDecimalsForTokenReadOnlyTest is Test {
             LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
         if (storedDecimals == uint8(decimals)) {
             assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Consistent));
+            assertEq(readDecimals, storedDecimals);
         } else {
             assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Inconsistent));
+            assertEq(readDecimals, storedDecimals);
         }
     }
 

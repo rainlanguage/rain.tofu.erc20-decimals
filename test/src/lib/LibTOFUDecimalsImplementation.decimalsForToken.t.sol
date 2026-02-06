@@ -42,8 +42,10 @@ contract LibTOFUDecimalsImplementationDecimalsForTokenTest is Test {
         (tofuOutcome, readDecimals) = LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, token);
         if (decimalsA == decimalsB) {
             assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Consistent));
+            assertEq(readDecimals, decimalsA);
         } else {
             assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Inconsistent));
+            assertEq(readDecimals, decimalsA);
         }
     }
 
