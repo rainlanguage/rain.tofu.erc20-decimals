@@ -38,7 +38,7 @@ library LibTOFUTokenDecimalsImplementation {
         // vault.
         bytes4 selector = TOFU_DECIMALS_SELECTOR;
         bool success;
-        uint8 readDecimals = 0;
+        uint256 readDecimals = 0;
         assembly ("memory-safe") {
             success := staticcall(gas(), token, selector, 0x04, 0, 0x20)
             if lt(returndatasize(), 0x20) {
@@ -61,7 +61,10 @@ library LibTOFUTokenDecimalsImplementation {
         // If we have no stored value, return the read value with the Initial
         // outcome.
         if (!tofuTokenDecimals.initialized) {
-            return (TOFUOutcome.Initial, readDecimals);
+            // We check that the read value fits in a uint8 above, so this cast
+            // is safe.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            return (TOFUOutcome.Initial, uint8(readDecimals));
         } else {
             // We have a stored value, check for consistency.
             return (
