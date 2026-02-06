@@ -26,7 +26,7 @@ library LibTOFUTokenDecimals {
     /// Zoltu for deterministic deployments so this address is fixed across all
     /// supported networks.
     ITOFUTokenDecimals constant TOFU_DECIMALS_DEPLOYMENT =
-        ITOFUTokenDecimals(0xF66761F6b5F58202998D6Cd944C81b22Dc6d4f1E);
+        ITOFUTokenDecimals(0x8b40CC241745D8eAB9396EDC12401Cfa1D5940c9);
 
     bytes32 constant TOFU_DECIMALS_EXPECTED_CODE_HASH =
         0x535e6c51d2ca2fe0bc29f8c0897fe88abe4ce78f7d522ff4b9f9272c26f27b1c;
