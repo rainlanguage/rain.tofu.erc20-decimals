@@ -4,14 +4,15 @@ pragma solidity =0.8.25;
 
 import {TOFUTokenDecimals} from "src/concrete/TOFUTokenDecimals.sol";
 import {LibTOFUTokenDecimals} from "src/lib/LibTOFUTokenDecimals.sol";
+import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract LibTOFUTokenDecimalsTest is Test {
-    // function testDeployAddress() external {
-    //     vm.createSelectFork(vm.envString("ETH_RPC_URL"));
-    //     address deployedAddress = LibTOFUTokenDecimalsDeploy.deployZoltu();
-    //     assertEq(deployedAddress, address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
-    // }
+    function testDeployAddress() external {
+        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
+        address deployedAddress = LibRainDeploy.deployZoltu(type(TOFUTokenDecimals).creationCode);
+        assertEq(deployedAddress, address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
+    }
 
     function testExpectedCodeHash() external {
         TOFUTokenDecimals tofuTokenDecimals = new TOFUTokenDecimals();
