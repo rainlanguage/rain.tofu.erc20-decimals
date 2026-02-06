@@ -35,7 +35,10 @@ library LibTOFUTokenDecimals {
     /// explicit guard prevents silent call failures and gives a clear error
     /// message for easier debugging.
     function ensureDeployed() internal view {
-        if (address(TOFU_DECIMALS_DEPLOYMENT).code.length == 0) {
+        if (
+            address(TOFU_DECIMALS_DEPLOYMENT).code.length == 0
+                || address(TOFU_DECIMALS_DEPLOYMENT).codehash != TOFU_DECIMALS_EXPECTED_CODE_HASH
+        ) {
             revert TOFUTokenDecimalsNotDeployed(address(TOFU_DECIMALS_DEPLOYMENT));
         }
     }
