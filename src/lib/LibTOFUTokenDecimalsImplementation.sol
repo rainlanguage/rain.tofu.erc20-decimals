@@ -11,7 +11,7 @@ import {
 
 library LibTOFUTokenDecimalsImplementation {
     /// @dev The selector for the `decimals()` function in the ERC20 standard.
-    bytes constant TOFU_DECIMALS_SELECTOR = hex"313ce567";
+    bytes4 constant TOFU_DECIMALS_SELECTOR = 0x313ce567;
 
     /// As per `ITOFUTokenDecimals.decimalsForTokenReadOnly`. Works as
     /// `decimalsForToken` but does not store any state, simply checking for
@@ -30,34 +30,44 @@ library LibTOFUTokenDecimalsImplementation {
     ) internal view returns (TOFUOutcome, uint8) {
         TOFUTokenDecimalsResult memory tofuTokenDecimals = sTOFUTokenDecimals[token];
 
-        // The default solidity try/catch logic will error if the return is a
-        // success but fails to deserialize to the target type. We need to handle
-        // all errors as read failures so that the calling context can decide
-        // whether to revert the current transaction or continue with the stored
-        // value. E.g. withdrawals if a vault may prefer to continue than trap
-        // funds, while deposits may prefer to revert and prevent new funds
-        // entering the vault.
-        //slither-disable-start low-level-calls
-        //slither-disable-start calls-loop
-        (bool success, bytes memory returnData) = token.staticcall(TOFU_DECIMALS_SELECTOR);
-        //slither-disable-end low-level-calls
-        //slither-disable-end calls-loop
-        if (!success || returnData.length != 0x20) {
+        // We need to handle all errors or unexpected return values as read
+        // failures so that the calling context can decide whether to revert the
+        // current transaction or continue with the stored value.
+        // E.g. withdrawals if a vault may prefer to continue than trap funds,
+        // while deposits may prefer to revert and prevent new funds entering the
+        // vault.
+        bytes4 selector = TOFU_DECIMALS_SELECTOR;
+        bool success;
+        uint256 readDecimals = 0;
+        assembly ("memory-safe") {
+            mstore(0, selector)
+            success := staticcall(gas(), token, 0, 0x04, 0, 0x20)
+            if lt(returndatasize(), 0x20) {
+                success := 0
+            }
+            if success {
+                readDecimals := mload(0)
+                if gt(readDecimals, 0xff) {
+                    success := 0
+                }
+            }
+        }
+
+        // In case of a read failure, return the stored value (which may be
+        // uninitialized) along with the ReadFailure outcome.
+        if (!success) {
             return (TOFUOutcome.ReadFailure, tofuTokenDecimals.tokenDecimals);
         }
 
-        uint256 decodedDecimals = abi.decode(returnData, (uint256));
-        if (decodedDecimals > type(uint8).max) {
-            return (TOFUOutcome.ReadFailure, tofuTokenDecimals.tokenDecimals);
-        }
-        // We already handled the case of decodedDecimals > type(uint8).max
-        // above so this cast is safe.
-        // forge-lint: disable-next-line(unsafe-typecast)
-        uint8 readDecimals = uint8(decodedDecimals);
-
+        // If we have no stored value, return the read value with the Initial
+        // outcome.
         if (!tofuTokenDecimals.initialized) {
-            return (TOFUOutcome.Initial, readDecimals);
+            // We check that the read value fits in a uint8 above, so this cast
+            // is safe.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            return (TOFUOutcome.Initial, uint8(readDecimals));
         } else {
+            // We have a stored value, check for consistency.
             return (
                 readDecimals == tofuTokenDecimals.tokenDecimals ? TOFUOutcome.Consistent : TOFUOutcome.Inconsistent,
                 tofuTokenDecimals.tokenDecimals
