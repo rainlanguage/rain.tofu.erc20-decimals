@@ -29,7 +29,7 @@ library LibTOFUTokenDecimals {
         ITOFUTokenDecimals(0xF66761F6b5F58202998D6Cd944C81b22Dc6d4f1E);
 
     bytes32 constant TOFU_DECIMALS_EXPECTED_CODE_HASH =
-        0x3b85bdaccbd9c2aed6963343e9e4c8f4c93b687d83239b1c1729bb5026fc3d75;
+        0xfc8023d9e9f01196a1d5c843a8bc1916041aab7404121c984c1227fb8132cace;
 
     /// Ensures that the TOFUTokenDecimals contract is deployed. Having an
     /// explicit guard prevents silent call failures and gives a clear error
