@@ -40,7 +40,8 @@ library LibTOFUTokenDecimalsImplementation {
         bool success;
         uint256 readDecimals = 0;
         assembly ("memory-safe") {
-            success := staticcall(gas(), token, selector, 0x04, 0, 0x20)
+            mstore(0, selector)
+            success := staticcall(gas(), token, 0, 0x04, 0, 0x20)
             if lt(returndatasize(), 0x20) {
                 success := 0
             }
