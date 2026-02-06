@@ -9,6 +9,12 @@ import {
     TokenDecimalsReadFailure
 } from "../interface/ITOFUTokenDecimals.sol";
 
+/// @title LibTOFUTokenDecimalsImplementation
+/// This library contains the implementation logic for reading token decimals
+/// with a trust on first use (TOFU) approach. It provides functions to read
+/// token decimals, store them on first read, and check for consistency on
+/// subsequent reads. The library is designed to be used in `TOFUTokenDecimals`,
+/// which handles the storage of token decimals as a concrete contract.
 library LibTOFUTokenDecimalsImplementation {
     /// @dev The selector for the `decimals()` function in the ERC20 standard.
     bytes4 constant TOFU_DECIMALS_SELECTOR = 0x313ce567;
