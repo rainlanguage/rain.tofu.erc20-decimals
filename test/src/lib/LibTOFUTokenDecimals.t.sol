@@ -24,6 +24,10 @@ contract LibTOFUTokenDecimalsTest is Test {
         return LibTOFUTokenDecimals.safeDecimalsForToken(token);
     }
 
+    function externalSafeDecimalsForTokenReadOnly(address token) external view returns (uint8) {
+        return LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
+    }
+
     function testDeployAddress() external {
         vm.createSelectFork(vm.envString("ETH_RPC_URL"));
         address deployedAddress = LibRainDeploy.deployZoltu(type(TOFUTokenDecimals).creationCode);
@@ -99,5 +103,16 @@ contract LibTOFUTokenDecimalsTest is Test {
             )
         );
         this.externalSafeDecimalsForToken(token);
+    }
+
+    function testSafeDecimalsForTokenReadOnlyRevert() external {
+        address token = makeAddr("TokenD");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                LibTOFUTokenDecimals.TOFUTokenDecimalsNotDeployed.selector,
+                address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT)
+            )
+        );
+        this.externalSafeDecimalsForTokenReadOnly(token);
     }
 }

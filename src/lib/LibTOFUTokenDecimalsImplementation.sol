@@ -129,4 +129,20 @@ library LibTOFUTokenDecimalsImplementation {
         }
         return readDecimals;
     }
+
+    /// As per `safeDecimalsForToken` but read only. Does not store the decimals
+    /// on first read.
+    /// @return The token's decimals.
+    // forge-lint: disable-next-line(mixed-case-variable)
+    function safeDecimalsForTokenReadOnly(
+        // forge-lint: disable-next-line(mixed-case-variable)
+        mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
+        address token
+    ) internal view returns (uint8) {
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        if (tofuOutcome != TOFUOutcome.Consistent && tofuOutcome != TOFUOutcome.Initial) {
+            revert TokenDecimalsReadFailure(token, tofuOutcome);
+        }
+        return readDecimals;
+    }
 }

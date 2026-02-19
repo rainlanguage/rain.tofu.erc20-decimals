@@ -31,4 +31,9 @@ contract TOFUTokenDecimals is ITOFUTokenDecimals {
     function safeDecimalsForToken(address token) external returns (uint8) {
         return LibTOFUTokenDecimalsImplementation.safeDecimalsForToken(sTOFUTokenDecimals, token);
     }
+
+    /// @inheritdoc ITOFUTokenDecimals
+    function safeDecimalsForTokenReadOnly(address token) external view returns (uint8) {
+        return LibTOFUTokenDecimalsImplementation.safeDecimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+    }
 }

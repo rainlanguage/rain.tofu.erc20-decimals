@@ -77,4 +77,10 @@ interface ITOFUTokenDecimals {
     /// @param token The token to read the decimals for.
     /// @return tokenDecimals The token's decimals.
     function safeDecimalsForToken(address token) external returns (uint8);
+
+    /// Safely reads the decimals for a token in a read only manner, reverting
+    /// if the read fails or is inconsistent with the stored value.
+    /// @param token The token to read the decimals for.
+    /// @return tokenDecimals The token's decimals.
+    function safeDecimalsForTokenReadOnly(address token) external view returns (uint8);
 }
