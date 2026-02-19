@@ -40,6 +40,25 @@ contract LibTOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         assertEq(readDecimals, decimalsB);
     }
 
+    function testDecimalsForTokenReadOnlyConsistentInconsistent(uint8 decimalsA, uint8 decimalsB) external {
+        address token = makeAddr("TokenA");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsA));
+
+        // Initialize storage via the stateful variant.
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        // Now read-only should see Consistent or Inconsistent.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsB));
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(token);
+        if (decimalsA == decimalsB) {
+            assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Consistent));
+            assertEq(readDecimals, decimalsA);
+        } else {
+            assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Inconsistent));
+            assertEq(readDecimals, decimalsA);
+        }
+    }
+
     function testDecimalsForTokenReadOnlyInvalidValueTooLarge(uint256 decimals) external {
         vm.assume(decimals > 0xff);
         address token = makeAddr("TokenB");
@@ -47,6 +66,23 @@ contract LibTOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         (TOFUOutcome tofuOutcome, uint8 readDecimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(token);
         assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
         assertEq(readDecimals, 0);
+    }
+
+    function testDecimalsForTokenReadOnlyInvalidValueTooLargeInitialized(uint8 storedDecimals, uint256 decimals)
+        external
+    {
+        vm.assume(decimals > 0xff);
+        address token = makeAddr("TokenB");
+
+        // Initialize storage first.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(storedDecimals));
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        // Now mock an invalid value.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, storedDecimals);
     }
 
     function testDecimalsForTokenReadOnlyInvalidValueNotEnoughData(bytes memory data, uint256 length) external {
@@ -63,11 +99,51 @@ contract LibTOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         assertEq(readDecimals, 0);
     }
 
+    function testDecimalsForTokenReadOnlyInvalidValueNotEnoughDataInitialized(
+        uint8 storedDecimals,
+        bytes memory data,
+        uint256 length
+    ) external {
+        length = bound(length, 0, 0x1f);
+        if (data.length > length) {
+            assembly ("memory-safe") {
+                mstore(data, length)
+            }
+        }
+        address token = makeAddr("TokenC");
+
+        // Initialize storage first.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(storedDecimals));
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        // Now mock invalid data.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), data);
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, storedDecimals);
+    }
+
     function testDecimalsForTokenReadOnlyTokenContractRevert() external {
         address token = makeAddr("TokenD");
         vm.etch(token, hex"fd");
         (TOFUOutcome tofuOutcome, uint8 readDecimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(token);
         assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
         assertEq(readDecimals, 0);
+    }
+
+    function testDecimalsForTokenReadOnlyTokenContractRevertInitialized(uint8 storedDecimals) external {
+        address token = makeAddr("TokenD");
+
+        // Initialize storage first.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(storedDecimals));
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        // Clear mocks so the etch takes effect.
+        vm.clearMockedCalls();
+        // Now make the token revert.
+        vm.etch(token, hex"fd");
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, storedDecimals);
     }
 }

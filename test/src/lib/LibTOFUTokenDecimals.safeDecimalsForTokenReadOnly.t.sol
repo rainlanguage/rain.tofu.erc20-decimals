@@ -30,6 +30,23 @@ contract LibTOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         assertEq(LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token), decimals);
     }
 
+    function testSafeDecimalsForTokenReadOnlyConsistentInconsistent(uint8 decimalsA, uint8 decimalsB) external {
+        address token = makeAddr("TokenA");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsA));
+
+        // Initialize storage via the stateful variant.
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        // Now read-only safe should succeed or revert.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsB));
+        if (decimalsA == decimalsB) {
+            assertEq(LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token), decimalsA);
+        } else {
+            vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent));
+            LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
+        }
+    }
+
     function testSafeDecimalsForTokenReadOnlyInvalidValueTooLarge(uint256 decimals) external {
         vm.assume(decimals > 0xff);
         address token = makeAddr("TokenB");

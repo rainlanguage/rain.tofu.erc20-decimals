@@ -30,6 +30,23 @@ contract LibTOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
         assertEq(LibTOFUTokenDecimals.safeDecimalsForToken(token), decimals);
     }
 
+    function testSafeDecimalsForTokenConsistentInconsistent(uint8 decimalsA, uint8 decimalsB) external {
+        address token = makeAddr("TokenA");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsA));
+
+        // First call initializes.
+        assertEq(LibTOFUTokenDecimals.safeDecimalsForToken(token), decimalsA);
+
+        // Second call with potentially different value.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsB));
+        if (decimalsA == decimalsB) {
+            assertEq(LibTOFUTokenDecimals.safeDecimalsForToken(token), decimalsA);
+        } else {
+            vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent));
+            LibTOFUTokenDecimals.safeDecimalsForToken(token);
+        }
+    }
+
     function testSafeDecimalsForTokenInvalidValueTooLarge(uint256 decimals) external {
         vm.assume(decimals > 0xff);
         address token = makeAddr("TokenB");
