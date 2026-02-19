@@ -57,7 +57,7 @@ The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `Token
 - Fuzz tests use `uint8` inputs for decimals values
 - `vm.mockCall` to mock `decimals()` return values
 - `vm.etch` with `hex"fd"` (revert opcode) to test failure paths
-- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); `LibTOFUTokenDecimals` tests fork mainnet and deploy via Zoltu
+- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork mainnet and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
 
 ## Dependencies
 
