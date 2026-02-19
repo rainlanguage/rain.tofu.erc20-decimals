@@ -40,9 +40,7 @@ contract LibTOFUTokenDecimalsTest is Test {
     }
 
     function testExpectedCreationCode() external pure {
-        assertEq(
-            type(TOFUTokenDecimals).creationCode, LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CREATION_CODE
-        );
+        assertEq(type(TOFUTokenDecimals).creationCode, LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CREATION_CODE);
     }
 
     function testEnsureDeployedRevert() external {
