@@ -39,6 +39,12 @@ contract LibTOFUTokenDecimalsTest is Test {
         assertEq(address(tofuTokenDecimals).codehash, LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CODE_HASH);
     }
 
+    function testExpectedCreationCode() external pure {
+        assertEq(
+            type(TOFUTokenDecimals).creationCode, LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CREATION_CODE
+        );
+    }
+
     function testEnsureDeployedRevert() external {
         vm.expectRevert(
             abi.encodeWithSelector(
