@@ -49,7 +49,7 @@ The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `Token
 
 - **Bytecode determinism is critical**: `bytecode_hash = "none"`, `cbor_metadata = false`, exact solc `=0.8.25`, optimizer at 1M runs. Changing any of these breaks the deployed address.
 - **`initialized` flag**: The `TOFUTokenDecimalsResult` struct uses a boolean to distinguish stored `0` decimals from uninitialized storage.
-- All `.sol` files must have `// SPDX-License-Identifier: LicenseRef-DCL-1.0` headers.
+- All `.sol` files must have the DCL-1.0 SPDX license identifier header.
 
 ## Testing Conventions
 
