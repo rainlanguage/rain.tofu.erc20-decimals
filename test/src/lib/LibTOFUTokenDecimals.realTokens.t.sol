@@ -71,9 +71,8 @@ contract LibTOFUTokenDecimalsRealTokensTest is Test {
         assertEq(decimals, 18);
     }
 
-    /// decimalsForTokenReadOnly returns Initial then Consistent after
-    /// initialization via decimalsForToken.
-    function testRealTokenDecimalsForTokenReadOnly() external {
+    /// decimalsForTokenReadOnly returns Initial then Consistent for WETH.
+    function testRealTokenDecimalsForTokenReadOnlyWETH() external {
         (TOFUOutcome outcome, uint8 decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(WETH);
         assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
         assertEq(decimals, 18);
@@ -85,8 +84,56 @@ contract LibTOFUTokenDecimalsRealTokensTest is Test {
         assertEq(decimals, 18);
     }
 
-    /// safeDecimalsForToken succeeds on real tokens.
-    function testRealTokenSafeDecimalsForToken() external {
+    /// decimalsForTokenReadOnly returns Initial then Consistent for USDC.
+    function testRealTokenDecimalsForTokenReadOnlyUSDC() external {
+        (TOFUOutcome outcome, uint8 decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(USDC);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+        assertEq(decimals, 6);
+
+        LibTOFUTokenDecimals.decimalsForToken(USDC);
+
+        (outcome, decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(USDC);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Consistent));
+        assertEq(decimals, 6);
+    }
+
+    /// decimalsForTokenReadOnly returns Initial then Consistent for WBTC.
+    function testRealTokenDecimalsForTokenReadOnlyWBTC() external {
+        (TOFUOutcome outcome, uint8 decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(WBTC);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+        assertEq(decimals, 8);
+
+        LibTOFUTokenDecimals.decimalsForToken(WBTC);
+
+        (outcome, decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(WBTC);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Consistent));
+        assertEq(decimals, 8);
+    }
+
+    /// decimalsForTokenReadOnly returns Initial then Consistent for DAI.
+    function testRealTokenDecimalsForTokenReadOnlyDAI() external {
+        (TOFUOutcome outcome, uint8 decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(DAI);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+        assertEq(decimals, 18);
+
+        LibTOFUTokenDecimals.decimalsForToken(DAI);
+
+        (outcome, decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(DAI);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Consistent));
+        assertEq(decimals, 18);
+    }
+
+    /// safeDecimalsForToken succeeds on WETH.
+    function testRealTokenSafeDecimalsForTokenWETH() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForToken(WETH);
+        assertEq(decimals, 18);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForToken(WETH);
+        assertEq(decimals, 18);
+    }
+
+    /// safeDecimalsForToken succeeds on USDC.
+    function testRealTokenSafeDecimalsForTokenUSDC() external {
         uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForToken(USDC);
         assertEq(decimals, 6);
 
@@ -94,8 +141,48 @@ contract LibTOFUTokenDecimalsRealTokensTest is Test {
         assertEq(decimals, 6);
     }
 
-    /// safeDecimalsForTokenReadOnly succeeds on real tokens.
-    function testRealTokenSafeDecimalsForTokenReadOnly() external {
+    /// safeDecimalsForToken succeeds on WBTC.
+    function testRealTokenSafeDecimalsForTokenWBTC() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForToken(WBTC);
+        assertEq(decimals, 8);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForToken(WBTC);
+        assertEq(decimals, 8);
+    }
+
+    /// safeDecimalsForToken succeeds on DAI.
+    function testRealTokenSafeDecimalsForTokenDAI() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForToken(DAI);
+        assertEq(decimals, 18);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForToken(DAI);
+        assertEq(decimals, 18);
+    }
+
+    /// safeDecimalsForTokenReadOnly succeeds on WETH.
+    function testRealTokenSafeDecimalsForTokenReadOnlyWETH() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(WETH);
+        assertEq(decimals, 18);
+
+        LibTOFUTokenDecimals.decimalsForToken(WETH);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(WETH);
+        assertEq(decimals, 18);
+    }
+
+    /// safeDecimalsForTokenReadOnly succeeds on USDC.
+    function testRealTokenSafeDecimalsForTokenReadOnlyUSDC() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(USDC);
+        assertEq(decimals, 6);
+
+        LibTOFUTokenDecimals.decimalsForToken(USDC);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(USDC);
+        assertEq(decimals, 6);
+    }
+
+    /// safeDecimalsForTokenReadOnly succeeds on WBTC.
+    function testRealTokenSafeDecimalsForTokenReadOnlyWBTC() external {
         uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(WBTC);
         assertEq(decimals, 8);
 
@@ -103,6 +190,17 @@ contract LibTOFUTokenDecimalsRealTokensTest is Test {
 
         decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(WBTC);
         assertEq(decimals, 8);
+    }
+
+    /// safeDecimalsForTokenReadOnly succeeds on DAI.
+    function testRealTokenSafeDecimalsForTokenReadOnlyDAI() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(DAI);
+        assertEq(decimals, 18);
+
+        LibTOFUTokenDecimals.decimalsForToken(DAI);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(DAI);
+        assertEq(decimals, 18);
     }
 
     /// Cross-token isolation: initializing multiple real tokens does not

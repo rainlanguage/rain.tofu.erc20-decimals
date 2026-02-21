@@ -17,6 +17,13 @@ contract TOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         concrete = new TOFUTokenDecimals();
     }
 
+    /// Calling with `address(0)` produces `ReadFailure` with zero decimals.
+    function testDecimalsForTokenReadOnlyAddressZero() external {
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForTokenReadOnly(address(0));
+        assertEq(uint256(outcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(result, 0);
+    }
+
     /// Read-only call on an uninitialized token returns `Initial` with the
     /// freshly read decimals value.
     function testDecimalsForTokenReadOnly(uint8 decimals) external {
@@ -26,6 +33,24 @@ contract TOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         (TOFUOutcome outcome, uint8 result) = concrete.decimalsForTokenReadOnly(token);
         assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
         assertEq(result, decimals);
+    }
+
+    /// Explicit boundary test for `decimals=0`. Proves the `initialized`
+    /// flag distinguishes stored zero from uninitialized storage: read-only
+    /// sees `Initial`, then `Consistent` after stateful initialization.
+    function testDecimalsForTokenReadOnlyDecimalsZero() external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint8(0)));
+
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForTokenReadOnly(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+        assertEq(result, 0);
+
+        concrete.decimalsForToken(token);
+
+        (outcome, result) = concrete.decimalsForTokenReadOnly(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Consistent));
+        assertEq(result, 0);
     }
 
     /// Read-only call after initialization with matching decimals returns

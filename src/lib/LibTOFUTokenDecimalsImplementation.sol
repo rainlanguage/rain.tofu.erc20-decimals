@@ -132,7 +132,7 @@ library LibTOFUTokenDecimalsImplementation {
     /// reads of token decimals and allows consistency checks on subsequent
     /// reads.
     /// @param token The token to read the decimals for.
-    /// @return The token's decimals.
+    /// @return tokenDecimals The token's decimals.
     function safeDecimalsForToken(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
@@ -156,7 +156,7 @@ library LibTOFUTokenDecimalsImplementation {
     /// reads of token decimals and allows consistency checks on subsequent
     /// reads.
     /// @param token The token to read the decimals for.
-    /// @return The token's decimals.
+    /// @return tokenDecimals The token's decimals.
     function safeDecimalsForTokenReadOnly(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,

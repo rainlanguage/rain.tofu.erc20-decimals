@@ -17,6 +17,29 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         concrete = new TOFUTokenDecimals();
     }
 
+    /// Calling with `address(0)` reverts with `TokenDecimalsReadFailure`.
+    function testSafeDecimalsForTokenReadOnlyAddressZeroReverts() external {
+        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0), TOFUOutcome.ReadFailure));
+        concrete.safeDecimalsForTokenReadOnly(address(0));
+    }
+
+    /// Explicit boundary test for `decimals=0`. Proves the `initialized`
+    /// flag distinguishes stored zero from uninitialized storage: read-only
+    /// safe call succeeds on `Initial`, then succeeds on `Consistent` after
+    /// stateful initialization.
+    function testSafeDecimalsForTokenReadOnlyDecimalsZero() external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint8(0)));
+
+        uint8 result = concrete.safeDecimalsForTokenReadOnly(token);
+        assertEq(result, 0);
+
+        concrete.decimalsForToken(token);
+
+        result = concrete.safeDecimalsForTokenReadOnly(token);
+        assertEq(result, 0);
+    }
+
     /// After initialization, read-only safe call with matching decimals
     /// succeeds.
     function testSafeDecimalsForTokenReadOnly(uint8 decimals) external {
