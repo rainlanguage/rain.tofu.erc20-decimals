@@ -92,6 +92,10 @@ library LibTOFUTokenDecimals {
     }
 
     /// @notice As per `ITOFUTokenDecimals.safeDecimalsForTokenReadOnly`.
+    /// WARNING: Before initialization, each call is a fresh `Initial` read with
+    /// no stored value to check against, so inconsistency between calls cannot
+    /// be detected. Callers needing TOFU protection must ensure
+    /// `decimalsForToken` has been called at least once for the token.
     /// @param token The token to read the decimals for.
     /// @return tokenDecimals The token's decimals.
     function safeDecimalsForTokenReadOnly(address token) internal view returns (uint8) {
