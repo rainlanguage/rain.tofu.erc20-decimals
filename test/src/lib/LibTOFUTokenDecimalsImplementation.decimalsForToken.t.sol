@@ -165,6 +165,28 @@ contract LibTOFUTokenDecimalsImplementationDecimalsForTokenTest is Test {
         assertEq(result, decimalsB);
     }
 
+    /// A ReadFailure on the very first (uninitialized) call must not write
+    /// storage. A subsequent valid call should still return Initial, proving
+    /// the failed first attempt left storage untouched.
+    function testDecimalsForTokenNoStorageWriteOnUninitializedReadFailure(uint8 decimalsA, uint256 tooLarge) external {
+        vm.assume(tooLarge > 0xff);
+        address token = makeAddr("TokenG");
+
+        // First call: ReadFailure via too-large value on uninitialized storage.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(tooLarge));
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, 0);
+
+        // Fix mock to return a valid value: should be Initial, not Consistent,
+        // proving the ReadFailure did not initialize storage.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsA));
+        (tofuOutcome, readDecimals) = LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Initial));
+        assertEq(readDecimals, decimalsA);
+    }
+
     function testDecimalsForTokenTokenContractRevert(uint8 storedDecimals) external {
         address token = makeAddr("TokenD");
         vm.etch(token, hex"fd");

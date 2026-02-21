@@ -46,8 +46,11 @@ enum TOFUOutcome {
 /// to withdraw their funds but preventing further deposits or trading until the
 /// issue is resolved.
 interface ITOFUTokenDecimals {
-    /// @notice Thrown when a TOFU decimals safe read fails.
-    /// @param token The token that failed to read decimals.
+    /// @notice Thrown by safe TOFU decimals reads when the outcome is neither
+    /// `Initial` nor `Consistent`. This covers both `Inconsistent` (token
+    /// changed its decimals) and `ReadFailure` (token unreadable). The
+    /// `tofuOutcome` parameter distinguishes the two cases.
+    /// @param token The token that failed the safe read.
     /// @param tofuOutcome The outcome of the TOFU read.
     error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
 

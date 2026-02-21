@@ -142,6 +142,26 @@ contract TOFUTokenDecimalsDecimalsForTokenTest is Test {
         assertEq(result, decimals);
     }
 
+    /// A ReadFailure on the very first (uninitialized) call must not write
+    /// storage. A subsequent valid call should still return Initial, proving
+    /// the failed first attempt left storage untouched.
+    function testDecimalsForTokenNoStorageWriteOnUninitializedReadFailure(uint8 decimals) external {
+        address token = makeAddr("token");
+
+        // First call: ReadFailure via reverting token on uninitialized storage.
+        vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForToken(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(result, 0);
+
+        // Fix mock to return a valid value: should be Initial, not Consistent,
+        // proving the ReadFailure did not initialize storage.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+        (outcome, result) = concrete.decimalsForToken(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+        assertEq(result, decimals);
+    }
+
     /// A token returning a value larger than `uint8` from `decimals()` is
     /// treated as `ReadFailure` via the `gt(readDecimals, 0xff)` guard.
     function testDecimalsForTokenOverwideDecimals(uint256 decimals) external {
@@ -182,5 +202,29 @@ contract TOFUTokenDecimalsDecimalsForTokenTest is Test {
         (TOFUOutcome outcome, uint8 result) = concrete.decimalsForToken(token);
         assertEq(uint256(outcome), uint256(TOFUOutcome.Consistent));
         assertEq(result, decimalsA);
+    }
+
+    /// All four external functions share one storage mapping. Exercises them
+    /// in sequence on the same token to verify shared-state wiring through
+    /// the concrete contract.
+    function testDecimalsForTokenCrossFunctionInteraction(uint8 decimals) external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        // 1. decimalsForToken: initializes storage.
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForToken(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+        assertEq(result, decimals);
+
+        // 2. decimalsForTokenReadOnly: sees the stored value as Consistent.
+        (outcome, result) = concrete.decimalsForTokenReadOnly(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Consistent));
+        assertEq(result, decimals);
+
+        // 3. safeDecimalsForToken: succeeds with the stored value.
+        assertEq(concrete.safeDecimalsForToken(token), decimals);
+
+        // 4. safeDecimalsForTokenReadOnly: succeeds with the stored value.
+        assertEq(concrete.safeDecimalsForTokenReadOnly(token), decimals);
     }
 }
