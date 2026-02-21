@@ -61,7 +61,9 @@ interface ITOFUTokenDecimals {
     /// when using read only decimals.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
-    /// @return tokenDecimals The token's decimals.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForTokenReadOnly(address token) external view returns (TOFUOutcome, uint8);
 
     /// Reads the decimals for a token, storing them if this is the first read.
@@ -69,7 +71,9 @@ interface ITOFUTokenDecimals {
     /// respond to inconsistent decimals, or other failures.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
-    /// @return tokenDecimals The token's decimals.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForToken(address token) external returns (TOFUOutcome, uint8);
 
     /// Safely reads the decimals for a token, reverting if the read fails or

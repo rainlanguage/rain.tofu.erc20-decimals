@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals. Reads `decimals()` once, stores the result, and detects inconsistency on subsequent reads. Deployed as a singleton via the Zoltu deterministic factory at `0x8b40CC241745D8eAB9396EDC12401Cfa1D5940c9` across all supported chains (Arbitrum, Base, Flare, Polygon).
+Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals. Reads `decimals()` once, stores the result, and detects inconsistency on subsequent reads. Deployed as a singleton via the Zoltu deterministic factory across all supported chains (Arbitrum, Base, Flare, Polygon).
 
 ## Build & Test Commands
 
@@ -53,7 +53,7 @@ The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `Token
 
 ## Testing Conventions
 
-- One test file per function: `ContractName.functionName.t.sol`
+- Test files follow `ContractName.functionName.t.sol` naming
 - Fuzz tests use `uint8` inputs for decimals values
 - `vm.mockCall` to mock `decimals()` return values
 - `vm.etch` with `hex"fd"` (revert opcode) to test failure paths

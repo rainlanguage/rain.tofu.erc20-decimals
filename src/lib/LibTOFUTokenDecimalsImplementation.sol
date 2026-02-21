@@ -28,7 +28,9 @@ library LibTOFUTokenDecimalsImplementation {
     /// reads.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
-    /// @return tokenDecimals The token's decimals.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForTokenReadOnly(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
@@ -91,11 +93,23 @@ library LibTOFUTokenDecimalsImplementation {
     /// If we have nothing stored we read from the token, store and return it
     /// with TOFUOutcome.Initial.
     ///
+    /// If the stored value is consistent with the token's decimals we return
+    /// the stored value and TOFUOutcome.Consistent.
+    ///
     /// If the call to `decimals` is not a success that deserializes cleanly to
     /// a `uint8` we return the stored value and TOFUOutcome.ReadFailure.
     ///
     /// If the stored value is inconsistent with the token's decimals we return
     /// the stored value and TOFUOutcome.Inconsistent.
+    /// @param sTOFUTokenDecimals The storage mapping of token addresses to
+    /// TOFUTokenDecimalsResult structs that will be used to track the initial
+    /// reads of token decimals and allows consistency checks on subsequent
+    /// reads.
+    /// @param token The token to read the decimals for.
+    /// @return tofuOutcome The outcome of the TOFU read.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForToken(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
@@ -113,9 +127,14 @@ library LibTOFUTokenDecimalsImplementation {
     }
 
     /// Trust on first use (TOFU) token decimals.
-    /// Same as `decimalsForToken` but reverts with a standard error if the
-    /// token's decimals are inconsistent. On the first read the decimals are
-    /// never considered inconsistent.
+    /// Same as `decimalsForToken` but reverts with `TokenDecimalsReadFailure`
+    /// if the token's decimals are inconsistent or the read fails. On the
+    /// first read the decimals are never considered inconsistent.
+    /// @param sTOFUTokenDecimals The storage mapping of token addresses to
+    /// TOFUTokenDecimalsResult structs that will be used to track the initial
+    /// reads of token decimals and allows consistency checks on subsequent
+    /// reads.
+    /// @param token The token to read the decimals for.
     /// @return The token's decimals.
     // forge-lint: disable-next-line(mixed-case-variable)
     function safeDecimalsForToken(
@@ -132,6 +151,11 @@ library LibTOFUTokenDecimalsImplementation {
 
     /// As per `safeDecimalsForToken` but read only. Does not store the decimals
     /// on first read.
+    /// @param sTOFUTokenDecimals The storage mapping of token addresses to
+    /// TOFUTokenDecimalsResult structs that will be used to track the initial
+    /// reads of token decimals and allows consistency checks on subsequent
+    /// reads.
+    /// @param token The token to read the decimals for.
     /// @return The token's decimals.
     // forge-lint: disable-next-line(mixed-case-variable)
     function safeDecimalsForTokenReadOnly(
