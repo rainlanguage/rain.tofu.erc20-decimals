@@ -18,12 +18,15 @@ contract TOFUTokenDecimalsImmutabilityTest is Test {
         uint256 reachable = LibExtrospectBytecode.scanEVMOpcodesReachableInBytecode(bytecode);
 
         // SELFDESTRUCT would allow the contract to be destroyed.
+        // forge-lint: disable-next-line(incorrect-shift)
         assertEq(reachable & (1 << EVM_OP_SELFDESTRUCT), 0, "SELFDESTRUCT is reachable");
         // DELEGATECALL would allow arbitrary code execution in the contract's
         // storage context.
+        // forge-lint: disable-next-line(incorrect-shift)
         assertEq(reachable & (1 << EVM_OP_DELEGATECALL), 0, "DELEGATECALL is reachable");
         // CALLCODE would allow arbitrary code execution in the contract's
         // storage context.
+        // forge-lint: disable-next-line(incorrect-shift)
         assertEq(reachable & (1 << EVM_OP_CALLCODE), 0, "CALLCODE is reachable");
     }
 }
