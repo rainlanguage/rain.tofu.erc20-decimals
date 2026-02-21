@@ -51,14 +51,14 @@ error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
 /// to withdraw their funds but preventing further deposits or trading until the
 /// issue is resolved.
 interface ITOFUTokenDecimals {
-    /// Reads the decimals for a token in a read only manner. This does not store
+    /// Reads the decimals for a token in a read-only manner. This does not store
     /// the decimals and is intended for callers to check that the decimals are
     /// either uninitialized or consistent with the stored value, without
     /// modifying state.
     /// This is relatively useless until after `decimalsForToken` has been
     /// called at least once for the token to initialize the stored decimals.
     /// The caller is advised to handle the uninitialized case appropriately
-    /// when using read only decimals.
+    /// when using read-only decimals.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
     /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
@@ -82,7 +82,7 @@ interface ITOFUTokenDecimals {
     /// @return tokenDecimals The token's decimals.
     function safeDecimalsForToken(address token) external returns (uint8);
 
-    /// Safely reads the decimals for a token in a read only manner, reverting
+    /// Safely reads the decimals for a token in a read-only manner, reverting
     /// if the read fails or is inconsistent with the stored value. When the
     /// token is uninitialized (no prior `decimalsForToken` call), returns the
     /// freshly read value without persisting it.

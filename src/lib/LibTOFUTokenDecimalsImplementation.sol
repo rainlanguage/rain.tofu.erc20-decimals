@@ -149,7 +149,7 @@ library LibTOFUTokenDecimalsImplementation {
         return readDecimals;
     }
 
-    /// As per `safeDecimalsForToken` but read only. Does not store the decimals
+    /// As per `safeDecimalsForToken` but read-only. Does not store the decimals
     /// on first read.
     /// @param sTOFUTokenDecimals The storage mapping of token addresses to
     /// TOFUTokenDecimalsResult structs that will be used to track the initial
