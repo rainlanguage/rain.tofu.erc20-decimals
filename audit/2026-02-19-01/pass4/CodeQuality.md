@@ -138,9 +138,11 @@ These commented-out alternative optimizer settings exist for developer convenien
 
 ---
 
+<!-- REUSE-IgnoreStart -->
 ### A05-6: All SPDX license identifiers are `LicenseRef-DCL-1.0` [INFO]
 
 All four source files, the deploy script, and all ten test files use `// SPDX-License-Identifier: LicenseRef-DCL-1.0`. This is consistent and matches the project requirement.
+<!-- REUSE-IgnoreEnd -->
 
 ---
 

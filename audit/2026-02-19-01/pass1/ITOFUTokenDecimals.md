@@ -48,8 +48,10 @@
 
 ### License
 
+<!-- REUSE-IgnoreStart -->
 - Line 1: `SPDX-License-Identifier: LicenseRef-DCL-1.0`
 - Line 2: `SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd`
+<!-- REUSE-IgnoreEnd -->
 
 ---
 

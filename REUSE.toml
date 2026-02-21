@@ -6,6 +6,7 @@ path = [
     ".github/**/",
     ".gitignore",
     ".gitmodules",
+    ".coderabbit.yaml",
     "audit/**/",
     "CLAUDE.md",
     "README.md",
