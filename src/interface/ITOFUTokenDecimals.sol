@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-/// Encodes the token's decimals for a token. Includes a bool to indicate if
+/// @notice Encodes the token's decimals for a token. Includes a bool to indicate if
 /// the token's decimals have been read from the external contract before. This
 /// guards against the default `0` value for unset storage data being
 /// misinterpreted as a valid token decimal value `0`.
@@ -27,13 +27,13 @@ enum TOFUOutcome {
     ReadFailure
 }
 
-/// Thrown when a TOFU decimals safe read fails.
+/// @notice Thrown when a TOFU decimals safe read fails.
 /// @param token The token that failed to read decimals.
 /// @param tofuOutcome The outcome of the TOFU read.
 error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
 
 /// @title ITOFUTokenDecimals
-/// Interface for a contract that reads and stores token decimals with a trust
+/// @notice Interface for a contract that reads and stores token decimals with a trust
 /// on first use (TOFU) approach. This is used to read the decimals of ERC20
 /// tokens and store them for future use, to guard against the possibility of
 /// tokens changing their decimals after the first read.

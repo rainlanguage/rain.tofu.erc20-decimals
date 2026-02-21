@@ -47,10 +47,49 @@ contract LibTOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         }
     }
 
+    /// When storage is already initialized and a subsequent read-only call
+    /// gets a value too large for uint8, safeDecimalsForTokenReadOnly must
+    /// revert with ReadFailure.
+    function testSafeDecimalsForTokenReadOnlyInvalidValueTooLargeInitialized(uint8 storedDecimals, uint256 decimals)
+        external
+    {
+        vm.assume(decimals > 0xff);
+        address token = makeAddr("TokenB");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(storedDecimals));
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
+    }
+
     function testSafeDecimalsForTokenReadOnlyInvalidValueTooLarge(uint256 decimals) external {
         vm.assume(decimals > 0xff);
         address token = makeAddr("TokenB");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
+    }
+
+    /// When storage is already initialized and a subsequent read-only call
+    /// gets insufficient data, safeDecimalsForTokenReadOnly must revert with
+    /// ReadFailure.
+    function testSafeDecimalsForTokenReadOnlyInvalidValueNotEnoughDataInitialized(
+        uint8 storedDecimals,
+        bytes memory data,
+        uint256 length
+    ) external {
+        length = bound(length, 0, 0x1f);
+        if (data.length > length) {
+            assembly ("memory-safe") {
+                mstore(data, length)
+            }
+        }
+        address token = makeAddr("TokenC");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(storedDecimals));
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), data);
         vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
     }
@@ -64,6 +103,19 @@ contract LibTOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         }
         address token = makeAddr("TokenC");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), data);
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
+    }
+
+    /// When storage is already initialized and the token contract starts
+    /// reverting, safeDecimalsForTokenReadOnly must revert with ReadFailure.
+    function testSafeDecimalsForTokenReadOnlyContractRevertInitialized(uint8 storedDecimals) external {
+        address token = makeAddr("TokenD");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(storedDecimals));
+        LibTOFUTokenDecimals.decimalsForToken(token);
+
+        vm.clearMockedCalls();
+        vm.etch(token, hex"fd");
         vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
     }

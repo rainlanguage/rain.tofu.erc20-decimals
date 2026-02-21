@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {TOFUOutcome, ITOFUTokenDecimals, TokenDecimalsReadFailure} from "../interface/ITOFUTokenDecimals.sol";
+import {TOFUOutcome, ITOFUTokenDecimals} from "../interface/ITOFUTokenDecimals.sol";
 
 /// @title LibTOFUTokenDecimals
-/// Library for reading and storing token decimals with a trust on first use
+/// @notice Library for reading and storing token decimals with a trust on first use
 /// (TOFU) approach. This is used to read the decimals of ERC20 tokens and store
 /// them for future use, under the assumption that the decimals will not change
 /// after the first read. As this involves storing the decimals, which is a state
@@ -19,7 +19,8 @@ import {TOFUOutcome, ITOFUTokenDecimals, TokenDecimalsReadFailure} from "../inte
 /// Essentially it removes the need for callers to be aware of or deal with the
 /// zoltu deployments directly.
 library LibTOFUTokenDecimals {
-    /// Thrown when attempting to use an address that is not deployed.
+    /// @notice Thrown when attempting to use an address that is not deployed.
+    /// @param deployedAddress The address that was expected to have the singleton.
     error TOFUTokenDecimalsNotDeployed(address deployedAddress);
 
     /// The deployed TOFUTokenDecimals contract address. The deploy script uses

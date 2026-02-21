@@ -59,6 +59,22 @@ contract LibTOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         }
     }
 
+    /// Read-only must not write storage. Calling decimalsForTokenReadOnly
+    /// then decimalsForToken must still produce Initial from the stateful
+    /// call, proving the read-only call did not initialize storage.
+    function testDecimalsForTokenReadOnlyDoesNotWriteStorage(uint8 decimals) external {
+        address token = makeAddr("TokenRO");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        // Read-only call.
+        (TOFUOutcome tofuOutcome,) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Initial));
+
+        // Stateful call must still see Initial.
+        (tofuOutcome,) = LibTOFUTokenDecimals.decimalsForToken(token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Initial));
+    }
+
     function testDecimalsForTokenReadOnlyInvalidValueTooLarge(uint256 decimals) external {
         vm.assume(decimals > 0xff);
         address token = makeAddr("TokenB");

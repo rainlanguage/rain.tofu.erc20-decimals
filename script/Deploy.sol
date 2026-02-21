@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
 import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
 import {TOFUTokenDecimals} from "../src/concrete/TOFUTokenDecimals.sol";
 import {LibTOFUTokenDecimals} from "../src/lib/LibTOFUTokenDecimals.sol";

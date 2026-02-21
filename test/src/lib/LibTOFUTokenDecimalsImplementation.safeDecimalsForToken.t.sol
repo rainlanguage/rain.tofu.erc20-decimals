@@ -29,6 +29,15 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenTest is Test {
         this.externalSafeDecimalsForToken(address(0));
     }
 
+    /// The Initial path through safeDecimalsForToken must succeed and return
+    /// the correct decimals.
+    function testSafeDecimalsForTokenInitial(uint8 decimals) external {
+        address token = makeAddr("TokenInitial");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        assertEq(this.externalSafeDecimalsForToken(token), decimals);
+    }
+
     function testSafeDecimalsForTokenValidValue(uint8 decimalsA, uint8 decimalsB) external {
         address token = makeAddr("TokenA");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsA));
