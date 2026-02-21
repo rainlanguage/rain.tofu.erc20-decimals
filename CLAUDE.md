@@ -64,5 +64,7 @@ The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `Token
 Managed as git submodules:
 - `forge-std` — Foundry test framework
 - `rain.deploy` — Rain deterministic deployment utilities (Zoltu factory)
+- `rain.extrospection` — Bytecode introspection (metamorphic detection, CBOR metadata, opcode scanning)
+- `rain.solmem` — Memory utilities (transitive dependency via `rain.extrospection`)
 
 Nix flake provides the development environment; CI runs all tasks as `nix develop -c <task>`.
