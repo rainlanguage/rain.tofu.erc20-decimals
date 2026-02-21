@@ -146,7 +146,8 @@ contract LibTOFUTokenDecimalsImplementationDecimalsForTokenTest is Test {
         vm.mockCall(tokenB, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsB));
 
         // Initialize both tokens.
-        (TOFUOutcome outcome, uint8 result) = LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, tokenA);
+        (TOFUOutcome outcome, uint8 result) =
+            LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, tokenA);
         assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
         assertEq(result, decimalsA);
 
