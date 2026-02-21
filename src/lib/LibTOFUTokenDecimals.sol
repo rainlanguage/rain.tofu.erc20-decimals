@@ -19,7 +19,7 @@ import {TOFUOutcome, ITOFUTokenDecimals} from "../interface/ITOFUTokenDecimals.s
 /// Essentially it removes the need for callers to be aware of or deal with the
 /// zoltu deployments directly.
 library LibTOFUTokenDecimals {
-    /// @notice Thrown when attempting to use an address that is not deployed.
+    /// @notice Thrown when the singleton is not deployed or has an unexpected codehash.
     /// @param deployedAddress The address that was expected to have the singleton.
     error TOFUTokenDecimalsNotDeployed(address deployedAddress);
 

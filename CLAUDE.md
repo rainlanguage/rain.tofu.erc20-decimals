@@ -31,7 +31,7 @@ nix develop -c rainix-sol-static
 nix develop -c rainix-sol-legal
 ```
 
-Tests require `ETH_RPC_URL` set to an Ethereum mainnet RPC endpoint. Many tests fork mainnet in their constructor via `vm.createSelectFork`.
+Tests require `ETH_RPC_URL` set to an RPC endpoint (CI uses Sepolia). Many tests fork in their constructor via `vm.createSelectFork`.
 
 ## Architecture
 
@@ -47,7 +47,7 @@ The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `Token
 
 ## Key Design Constraints
 
-- **Bytecode determinism is critical**: `bytecode_hash = "none"`, `cbor_metadata = false`, exact solc `=0.8.25`, optimizer at 1M runs. Changing any of these breaks the deployed address.
+- **Bytecode determinism is critical**: `bytecode_hash = "none"`, `cbor_metadata = false`, exact solc `=0.8.25`, `evm_version = "cancun"`, optimizer at 1M runs. Changing any of these breaks the deployed address.
 - **`initialized` flag**: The `TOFUTokenDecimalsResult` struct uses a boolean to distinguish stored `0` decimals from uninitialized storage.
 - All `.sol` files must have the DCL-1.0 SPDX license identifier header.
 
@@ -57,7 +57,7 @@ The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `Token
 - Fuzz tests use `uint8` inputs for decimals values
 - `vm.mockCall` to mock `decimals()` return values
 - `vm.etch` with `hex"fd"` (revert opcode) to test failure paths
-- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork mainnet and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
+- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork via `ETH_RPC_URL` and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
 
 ## Dependencies
 

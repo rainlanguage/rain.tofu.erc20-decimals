@@ -150,7 +150,10 @@ library LibTOFUTokenDecimalsImplementation {
     }
 
     /// As per `safeDecimalsForToken` but read-only. Does not store the decimals
-    /// on first read.
+    /// on first read. WARNING: Before initialization, each call is a fresh
+    /// `Initial` read with no stored value to check against, so inconsistency
+    /// between calls cannot be detected. Callers needing TOFU protection must
+    /// ensure `decimalsForToken` has been called at least once for the token.
     /// @param sTOFUTokenDecimals The storage mapping of token addresses to
     /// TOFUTokenDecimalsResult structs that will be used to track the initial
     /// reads of token decimals and allows consistency checks on subsequent
