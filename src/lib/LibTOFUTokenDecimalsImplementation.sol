@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {TOFUTokenDecimalsResult, TOFUOutcome, TokenDecimalsReadFailure} from "../interface/ITOFUTokenDecimals.sol";
+import {TOFUTokenDecimalsResult, TOFUOutcome, ITOFUTokenDecimals} from "../interface/ITOFUTokenDecimals.sol";
 
 /// @title LibTOFUTokenDecimalsImplementation
 /// @notice This library contains the implementation logic for reading token decimals
@@ -114,17 +114,17 @@ library LibTOFUTokenDecimalsImplementation {
         internal
         returns (TOFUOutcome, uint8)
     {
-        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        (TOFUOutcome tofuOutcome, uint8 tokenDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
 
         if (tofuOutcome == TOFUOutcome.Initial) {
-            sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: readDecimals});
+            sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: tokenDecimals});
         }
-        return (tofuOutcome, readDecimals);
+        return (tofuOutcome, tokenDecimals);
     }
 
     /// @notice As per `ITOFUTokenDecimals.safeDecimalsForToken`. Trust on first
     /// use (TOFU) token decimals.
-    /// Same as `decimalsForToken` but reverts with `TokenDecimalsReadFailure`
+    /// Same as `decimalsForToken` but reverts with `ITOFUTokenDecimals.TokenDecimalsReadFailure`
     /// if the token's decimals are inconsistent or the read fails. On the
     /// first read the decimals are never considered inconsistent.
     /// @param sTOFUTokenDecimals The storage mapping of token addresses to
@@ -138,11 +138,11 @@ library LibTOFUTokenDecimalsImplementation {
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
         address token
     ) internal returns (uint8) {
-        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForToken(sTOFUTokenDecimals, token);
+        (TOFUOutcome tofuOutcome, uint8 tokenDecimals) = decimalsForToken(sTOFUTokenDecimals, token);
         if (tofuOutcome != TOFUOutcome.Consistent && tofuOutcome != TOFUOutcome.Initial) {
-            revert TokenDecimalsReadFailure(token, tofuOutcome);
+            revert ITOFUTokenDecimals.TokenDecimalsReadFailure(token, tofuOutcome);
         }
-        return readDecimals;
+        return tokenDecimals;
     }
 
     /// @notice As per `ITOFUTokenDecimals.safeDecimalsForTokenReadOnly`.
@@ -162,10 +162,10 @@ library LibTOFUTokenDecimalsImplementation {
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
         address token
     ) internal view returns (uint8) {
-        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        (TOFUOutcome tofuOutcome, uint8 tokenDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
         if (tofuOutcome != TOFUOutcome.Consistent && tofuOutcome != TOFUOutcome.Initial) {
-            revert TokenDecimalsReadFailure(token, tofuOutcome);
+            revert ITOFUTokenDecimals.TokenDecimalsReadFailure(token, tofuOutcome);
         }
-        return readDecimals;
+        return tokenDecimals;
     }
 }

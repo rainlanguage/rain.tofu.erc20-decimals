@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std/Test.sol";
 import {TOFUTokenDecimals} from "src/concrete/TOFUTokenDecimals.sol";
-import {TOFUOutcome, TokenDecimalsReadFailure} from "src/interface/ITOFUTokenDecimals.sol";
+import {TOFUOutcome, ITOFUTokenDecimals} from "src/interface/ITOFUTokenDecimals.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
 
 /// Smoke test for the TOFUTokenDecimals concrete contract's
@@ -51,7 +51,7 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
 
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsB));
 
-        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent));
+        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent));
         concrete.safeDecimalsForTokenReadOnly(token);
     }
 
@@ -62,7 +62,7 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         address token = makeAddr("token");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
 
-        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         concrete.safeDecimalsForTokenReadOnly(token);
     }
 
@@ -72,7 +72,7 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         address token = makeAddr("token");
         vm.etch(token, hex"00");
 
-        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         concrete.safeDecimalsForTokenReadOnly(token);
     }
 
@@ -86,7 +86,7 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
 
         vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
 
-        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         concrete.safeDecimalsForTokenReadOnly(token);
     }
 
@@ -96,7 +96,7 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         address token = makeAddr("token");
         vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
 
-        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         concrete.safeDecimalsForTokenReadOnly(token);
     }
 

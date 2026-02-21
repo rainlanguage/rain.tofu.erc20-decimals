@@ -27,11 +27,6 @@ enum TOFUOutcome {
     ReadFailure
 }
 
-/// @notice Thrown when a TOFU decimals safe read fails.
-/// @param token The token that failed to read decimals.
-/// @param tofuOutcome The outcome of the TOFU read.
-error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
-
 /// @title ITOFUTokenDecimals
 /// @notice Interface for a contract that reads and stores token decimals with a trust
 /// on first use (TOFU) approach. This is used to read the decimals of ERC20
@@ -51,6 +46,11 @@ error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
 /// to withdraw their funds but preventing further deposits or trading until the
 /// issue is resolved.
 interface ITOFUTokenDecimals {
+    /// @notice Thrown when a TOFU decimals safe read fails.
+    /// @param token The token that failed to read decimals.
+    /// @param tofuOutcome The outcome of the TOFU read.
+    error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
+
     /// @notice Reads the decimals for a token in a read-only manner. This does not store
     /// the decimals and is intended for callers to check that the decimals are
     /// either uninitialized or consistent with the stored value, without
@@ -67,8 +67,9 @@ interface ITOFUTokenDecimals {
     function decimalsForTokenReadOnly(address token) external view returns (TOFUOutcome, uint8);
 
     /// @notice Reads the decimals for a token, storing them if this is the first read.
-    /// The outcome enum needs to be handled by the caller to detect and
-    /// respond to inconsistent decimals, or other failures.
+    /// Storage is written only on the `Initial` outcome; subsequent calls never
+    /// modify the stored value. The outcome enum needs to be handled by the
+    /// caller to detect and respond to inconsistent decimals, or other failures.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
     /// @return tokenDecimals The token's decimals. On `Initial`, the freshly

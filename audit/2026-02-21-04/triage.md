@@ -107,64 +107,64 @@ Duplicate findings across agents are consolidated below. When multiple agents in
 ### P2-A05-1: EOA/zero-returndata path not deterministically isolated at impl layer [LOW]
 **Source**: pass2/LibTOFUTokenDecimalsImplementation.md (A05-P2-01, A05-P2-02)
 **Description**: No named test uses a plain EOA address (non-contract, non-zero) to deterministically exercise the `returndatasize == 0` sub-case.
-**Status**: PENDING
+**Status**: DISMISSED — The `address(0)` test already exercises the identical `returndatasize == 0` EVM code path. A non-zero EOA behaves identically; the fuzz test `testDecimalsForTokenInvalidValueNotEnoughData` also covers `length=0`.
 
 ### P2-A05-4: safeDecimalsForTokenReadOnly not integration-tested at impl layer [LOW]
 **Source**: pass2/LibTOFUTokenDecimalsImplementation.md (A05-P2-04)
 **Description**: No test initializes via `decimalsForToken` then reads back through `safeDecimalsForTokenReadOnly` at the implementation layer.
-**Status**: PENDING
+**Status**: FIXED — Added `testSafeDecimalsForTokenReadOnlyAfterDecimalsForToken` fuzz test to `LibTOFUTokenDecimalsImplementation.safeDecimalsForTokenReadOnly.t.sol`.
 
 ### P3-A01-1: Deploy.run() doesn't document empty dependencies argument [LOW]
 **Source**: pass3/Deploy.md (A01-D-DOC-01)
 **Description**: `new address[](0)` is passed as dependencies but the NatSpec doesn't explain this means no on-chain prerequisites.
-**Status**: PENDING
+**Status**: DISMISSED — Self-explanatory from the code; `new address[](0)` is idiomatic Solidity for "no dependencies".
 
 ### P3-A02-3: forge-lint suppression between NatSpec and storage variable [LOW]
 **Source**: pass3/TOFUTokenDecimals.md (A02-F03)
 **Description**: The `forge-lint: disable-next-line(mixed-case-variable)` comment sits between the `@inheritdoc` NatSpec block and the `sTOFUTokenDecimals` storage variable, which may confuse doc tooling.
-**Status**: PENDING
+**Status**: DISMISSED — `disable-next-line` must be directly above the variable to work. Moving it above NatSpec would target the comment line instead. No practical doc tooling issue observed.
 
 ### P3-A02-4: No @dev for singleton/deterministic-bytecode constraint on TOFUTokenDecimals [LOW]
 **Source**: pass3/TOFUTokenDecimals.md (A02-F04)
 **Description**: The concrete contract has no documentation explaining why it uses exact pragma `=0.8.25` or the bytecode determinism constraints.
-**Status**: PENDING
+**Status**: DISMISSED — Bytecode determinism constraints are documented in CLAUDE.md and foundry.toml. Adding them to NatSpec risks staleness.
 
 ### P3-A03-4: decimalsForToken interface description omits state-mutation detail [LOW]
 **Source**: pass3/ITOFUTokenDecimals.md (A03-DOC-04)
 **Description**: The NatSpec doesn't explicitly state that storage is written only on the `Initial` outcome.
-**Status**: PENDING
+**Status**: FIXED — Added "Storage is written only on the `Initial` outcome; subsequent calls never modify the stored value." to `decimalsForToken` NatSpec in `ITOFUTokenDecimals.sol`.
 
 ### P3-A03-5: safe* functions don't name TokenDecimalsReadFailure in interface NatSpec [LOW]
 **Source**: pass3/ITOFUTokenDecimals.md (A03-DOC-05)
 **Description**: Integrators reading only the interface cannot discover which error type the safe variants revert with.
-**Status**: PENDING
+**Status**: FIXED — Moved `TokenDecimalsReadFailure` error from file scope into the `ITOFUTokenDecimals` interface. Updated all imports and references across source and test files to use `ITOFUTokenDecimals.TokenDecimalsReadFailure`.
 
 ### P3-A04-4: ensureDeployed @notice omits codehash-mismatch sub-condition [LOW]
 **Source**: pass3/LibTOFUTokenDecimals.md (A04-F04)
 **Description**: Documentation only mentions "deployed" check but not the codehash verification.
-**Status**: PENDING
+**Status**: FIXED — Updated `ensureDeployed` NatSpec to mention both no-code and codehash-mismatch conditions.
 
 ### P3-A04-5: Delegating functions are cross-references only [LOW]
 **Source**: pass3/LibTOFUTokenDecimals.md (A04-F05)
 **Description**: The four wrapper functions say "As per `ITOFUTokenDecimals.X`" but provide no standalone description.
-**Status**: PENDING
+**Status**: DISMISSED — Cross-reference to the interface is the intended pattern for thin wrappers. Each function also documents its `@param` and `@return` tags.
 
 ### P3-A04-7: TOFUTokenDecimalsNotDeployed parameter name misleading [LOW]
 **Source**: pass3/LibTOFUTokenDecimals.md (A04-F07)
 **Description**: Parameter is named `deployedAddress` which implies deployment succeeded, but it's the address where deployment was expected.
-**Status**: PENDING
+**Status**: FIXED — Renamed parameter from `deployedAddress` to `expectedAddress`.
 
 ### P3-A05-4: TOFU_DECIMALS_SELECTOR uses @dev while other items use @notice [LOW]
 **Source**: pass3/LibTOFUTokenDecimalsImplementation.md (A05-4)
 **Description**: Style inconsistency — the constant uses `@dev` while other documented items use `@notice`.
-**Status**: PENDING
+**Status**: DISMISSED — `@dev` is appropriate for an internal implementation constant not intended for end-user documentation.
 
 ### P3-A05-5: Pre-initialization WARNING embedded in prose, not a distinct @dev tag [LOW]
 **Source**: pass3/LibTOFUTokenDecimalsImplementation.md (A05-5)
 **Description**: The critical warning about TOFU bypass before initialization is part of the general `///` description rather than a separate `@dev` block.
-**Status**: PENDING
+**Status**: DISMISSED — The WARNING prefix is already prominent inline. Splitting into a separate `@dev` block is a style preference with no practical benefit.
 
 ### P3-A05-6: @return label mismatch with local variable [LOW]
 **Source**: pass3/LibTOFUTokenDecimalsImplementation.md (A05-6)
 **Description**: `@return tokenDecimals` doesn't match the local variable name `readDecimals` used in `decimalsForToken`.
-**Status**: PENDING
+**Status**: FIXED — Renamed local variable from `readDecimals` to `tokenDecimals` in `decimalsForToken`, `safeDecimalsForToken`, and `safeDecimalsForTokenReadOnly`.
