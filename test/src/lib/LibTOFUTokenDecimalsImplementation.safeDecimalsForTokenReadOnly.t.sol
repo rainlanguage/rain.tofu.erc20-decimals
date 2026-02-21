@@ -19,13 +19,21 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
     }
 
     function testSafeDecimalsForTokenReadOnlyAddressZeroUninitialized() external {
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0), TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0), TOFUOutcome.ReadFailure
+            )
+        );
         this.externalSafeDecimalsForTokenReadOnly(address(0));
     }
 
     function testSafeDecimalsForTokenReadOnlyAddressZeroInitialized(uint8 storedDecimals) external {
         sTokenDecimals[address(0)] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: uint8(storedDecimals)});
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0), TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0), TOFUOutcome.ReadFailure
+            )
+        );
         this.externalSafeDecimalsForTokenReadOnly(address(0));
     }
 
@@ -43,7 +51,11 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
         if (decimalsA == decimalsB) {
             assertEq(this.externalSafeDecimalsForTokenReadOnly(token), decimalsA);
         } else {
-            vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent));
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent
+                )
+            );
             this.externalSafeDecimalsForTokenReadOnly(token);
         }
     }
@@ -53,7 +65,9 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
         address token = makeAddr("TokenB");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
 
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         this.externalSafeDecimalsForTokenReadOnly(token);
     }
 
@@ -65,7 +79,9 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
 
         sTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: uint8(storedDecimals)});
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         this.externalSafeDecimalsForTokenReadOnly(token);
     }
 
@@ -81,7 +97,9 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
         address token = makeAddr("TokenC");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), data);
 
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         this.externalSafeDecimalsForTokenReadOnly(token);
     }
 
@@ -100,14 +118,18 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), data);
 
         sTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: uint8(storedDecimals)});
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         this.externalSafeDecimalsForTokenReadOnly(token);
     }
 
     function testSafeDecimalsForTokenReadOnlyTokenContractRevertUninitialized() external {
         address token = makeAddr("TokenD");
         vm.etch(token, hex"fd");
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         this.externalSafeDecimalsForTokenReadOnly(token);
     }
 
@@ -126,7 +148,11 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
         if (decimalsA == decimalsB) {
             assertEq(this.externalSafeDecimalsForTokenReadOnly(token), decimalsA);
         } else {
-            vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent));
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent
+                )
+            );
             this.externalSafeDecimalsForTokenReadOnly(token);
         }
     }
@@ -135,7 +161,9 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenReadOnlyTest is T
         address token = makeAddr("TokenD");
         vm.etch(token, hex"fd");
         sTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: uint8(storedDecimals)});
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         this.externalSafeDecimalsForTokenReadOnly(token);
     }
 }

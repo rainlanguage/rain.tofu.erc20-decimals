@@ -34,7 +34,9 @@
 - `pragma solidity =0.8.25;` (exact version pin, line 3)
 
 ### License
+<!-- REUSE-IgnoreStart -->
 - `SPDX-License-Identifier: LicenseRef-DCL-1.0` (line 1)
+<!-- REUSE-IgnoreEnd -->
 
 ---
 

@@ -19,7 +19,11 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
 
     /// Calling with `address(0)` reverts with `TokenDecimalsReadFailure`.
     function testSafeDecimalsForTokenAddressZeroReverts() external {
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0), TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, address(0), TOFUOutcome.ReadFailure
+            )
+        );
         concrete.safeDecimalsForToken(address(0));
     }
 
@@ -69,7 +73,11 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
 
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsB));
 
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.Inconsistent
+            )
+        );
         concrete.safeDecimalsForToken(token);
     }
 
@@ -79,7 +87,9 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
         address token = makeAddr("token");
         vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
 
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         concrete.safeDecimalsForToken(token);
     }
 
@@ -90,7 +100,9 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
         address token = makeAddr("token");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
 
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         concrete.safeDecimalsForToken(token);
     }
 
@@ -100,7 +112,9 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
         address token = makeAddr("token");
         vm.etch(token, hex"00");
 
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         concrete.safeDecimalsForToken(token);
     }
 
@@ -114,7 +128,9 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
 
         vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
 
-        vm.expectRevert(abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
         concrete.safeDecimalsForToken(token);
     }
 }

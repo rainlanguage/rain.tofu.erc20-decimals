@@ -36,7 +36,9 @@
 
 ### License
 
+<!-- REUSE-IgnoreStart -->
 - `SPDX-License-Identifier: LicenseRef-DCL-1.0` (line 1) -- compliant with project requirements.
+<!-- REUSE-IgnoreEnd -->
 
 ## Security Review
 
