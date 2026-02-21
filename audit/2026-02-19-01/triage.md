@@ -23,7 +23,7 @@ All LOW+ findings across all passes. Findings are keyed by `Pass.AgentID-Finding
 | P0-3 | 0 | CLAUDE.md | Test file naming convention doesn't mention base test files | FIXED |
 | P1.A02-5 | 1 | LibTOFUTokenDecimalsImplementation | Forwarding all gas to external staticcall (theoretical gas griefing) | DISMISSED |
 | P1.A04-3 | 1 | LibTOFUTokenDecimals | External calls propagate reverts without wrapping | DISMISSED |
-| P1.A04-7 | 1 | LibTOFUTokenDecimals | TOCTOU gap between ensureDeployed() and external call (theoretical only) | PENDING |
+| P1.A04-7 | 1 | LibTOFUTokenDecimals | TOCTOU gap between ensureDeployed() and external call (theoretical only) | FIXED |
 | P2.A01-2 | 2 | ITOFUTokenDecimals | No test for TOFUTokenDecimals concrete contract in isolation | PENDING |
 | P2.A02-3 | 2 | LibTOFUTokenDecimalsImplementation | No test that storage is NOT written on non-Initial outcomes | PENDING |
 | P2.A02-4 | 2 | LibTOFUTokenDecimalsImplementation | `safeDecimalsForToken` Initial path not directly tested via safe wrapper | PENDING |

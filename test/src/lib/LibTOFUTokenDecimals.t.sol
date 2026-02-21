@@ -5,6 +5,8 @@ pragma solidity =0.8.25;
 import {TOFUTokenDecimals} from "src/concrete/TOFUTokenDecimals.sol";
 import {LibTOFUTokenDecimals, TOFUOutcome} from "src/lib/LibTOFUTokenDecimals.sol";
 import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
+import {LibExtrospectMetamorphic} from "rain.extrospection/lib/LibExtrospectMetamorphic.sol";
+import {LibExtrospectBytecode} from "rain.extrospection/lib/LibExtrospectBytecode.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract LibTOFUTokenDecimalsTest is Test {
@@ -35,6 +37,25 @@ contract LibTOFUTokenDecimalsTest is Test {
 
         // Check that ensure deployed finds the contract correctly.
         LibTOFUTokenDecimals.ensureDeployed();
+    }
+
+    /// The singleton bytecode must not contain any reachable metamorphic
+    /// opcodes (SELFDESTRUCT, DELEGATECALL, CALLCODE, CREATE, CREATE2).
+    /// This ensures the code at the singleton address cannot change after
+    /// deployment, eliminating the theoretical TOCTOU gap between
+    /// ensureDeployed() and the subsequent external call.
+    function testNotMetamorphic() external {
+        TOFUTokenDecimals singleton = new TOFUTokenDecimals();
+        LibExtrospectMetamorphic.checkNotMetamorphic(address(singleton).code);
+    }
+
+    /// The singleton must be compiled without CBOR metadata
+    /// (`cbor_metadata = false` in foundry.toml). CBOR metadata includes a
+    /// content hash of the source, which an attacker could exploit for
+    /// metamorphic-style address reuse if the factory doesn't account for it.
+    function testNoCBORMetadata() external {
+        TOFUTokenDecimals singleton = new TOFUTokenDecimals();
+        LibExtrospectBytecode.checkNoSolidityCBORMetadata(address(singleton));
     }
 
     function testExpectedCodeHash() external {
