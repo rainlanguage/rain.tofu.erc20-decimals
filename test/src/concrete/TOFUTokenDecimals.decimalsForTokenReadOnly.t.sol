@@ -83,6 +83,29 @@ contract TOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         assertEq(result, decimals);
     }
 
+    /// A token returning a value larger than `uint8` from `decimals()` is
+    /// treated as `ReadFailure` via the `gt(readDecimals, 0xff)` guard.
+    function testDecimalsForTokenReadOnlyOverwideDecimals(uint256 decimals) external {
+        vm.assume(decimals > 0xff);
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForTokenReadOnly(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(result, 0);
+    }
+
+    /// A contract with code but no `decimals()` function (STOP opcode only)
+    /// produces `ReadFailure` via the `returndatasize < 0x20` guard.
+    function testDecimalsForTokenReadOnlyNoDecimalsFunction() external {
+        address token = makeAddr("token");
+        vm.etch(token, hex"00");
+
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForTokenReadOnly(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(result, 0);
+    }
+
     /// Calling `decimalsForTokenReadOnly` does not persist state; a
     /// subsequent stateful call still sees `Initial`.
     function testDecimalsForTokenReadOnlyDoesNotWriteStorage(uint8 decimals) external {

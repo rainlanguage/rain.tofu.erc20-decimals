@@ -55,6 +55,41 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         concrete.safeDecimalsForTokenReadOnly(token);
     }
 
+    /// A token returning a value larger than `uint8` from `decimals()` reverts
+    /// with `ReadFailure` via the `gt(readDecimals, 0xff)` guard.
+    function testSafeDecimalsForTokenReadOnlyOverwideDecimalsReverts(uint256 decimals) external {
+        vm.assume(decimals > 0xff);
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        concrete.safeDecimalsForTokenReadOnly(token);
+    }
+
+    /// A contract with code but no `decimals()` function (STOP opcode only)
+    /// reverts with `ReadFailure` via the `returndatasize < 0x20` guard.
+    function testSafeDecimalsForTokenReadOnlyNoDecimalsFunctionReverts() external {
+        address token = makeAddr("token");
+        vm.etch(token, hex"00");
+
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        concrete.safeDecimalsForTokenReadOnly(token);
+    }
+
+    /// A reverting token after initialization still reverts with
+    /// `TokenDecimalsReadFailure` and the `ReadFailure` outcome.
+    function testSafeDecimalsForTokenReadOnlyReadFailureInitializedReverts(uint8 decimals) external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        concrete.decimalsForToken(token);
+
+        vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
+
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        concrete.safeDecimalsForTokenReadOnly(token);
+    }
+
     /// A reverting token causes `TokenDecimalsReadFailure` with the
     /// `ReadFailure` outcome.
     function testSafeDecimalsForTokenReadOnlyReadFailureReverts() external {

@@ -120,6 +120,18 @@ contract LibTOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
     }
 
+    /// Calling `safeDecimalsForTokenReadOnly` does not persist state; a
+    /// subsequent stateful call still sees `Initial`.
+    function testSafeDecimalsForTokenReadOnlyDoesNotWriteStorage(uint8 decimals) external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
+
+        (TOFUOutcome outcome,) = LibTOFUTokenDecimals.decimalsForToken(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+    }
+
     function testSafeDecimalsForTokenReadOnlyContractRevert() external {
         address token = makeAddr("TokenD");
         vm.etch(token, hex"fd");

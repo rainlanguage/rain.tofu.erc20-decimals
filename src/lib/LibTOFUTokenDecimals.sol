@@ -56,7 +56,7 @@ library LibTOFUTokenDecimals {
         }
     }
 
-    /// As per `ITOFUTokenDecimals.decimalsForTokenReadOnly`.
+    /// @notice As per `ITOFUTokenDecimals.decimalsForTokenReadOnly`.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
     /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
@@ -69,7 +69,7 @@ library LibTOFUTokenDecimals {
         return TOFU_DECIMALS_DEPLOYMENT.decimalsForTokenReadOnly(token);
     }
 
-    /// As per `ITOFUTokenDecimals.decimalsForToken`.
+    /// @notice As per `ITOFUTokenDecimals.decimalsForToken`.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
     /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
@@ -82,7 +82,7 @@ library LibTOFUTokenDecimals {
         return TOFU_DECIMALS_DEPLOYMENT.decimalsForToken(token);
     }
 
-    /// As per `ITOFUTokenDecimals.safeDecimalsForToken`.
+    /// @notice As per `ITOFUTokenDecimals.safeDecimalsForToken`.
     /// @param token The token to read the decimals for.
     /// @return tokenDecimals The token's decimals.
     function safeDecimalsForToken(address token) internal returns (uint8) {
@@ -90,7 +90,7 @@ library LibTOFUTokenDecimals {
         return TOFU_DECIMALS_DEPLOYMENT.safeDecimalsForToken(token);
     }
 
-    /// As per `ITOFUTokenDecimals.safeDecimalsForTokenReadOnly`.
+    /// @notice As per `ITOFUTokenDecimals.safeDecimalsForTokenReadOnly`.
     /// @param token The token to read the decimals for.
     /// @return tokenDecimals The token's decimals.
     function safeDecimalsForTokenReadOnly(address token) internal view returns (uint8) {

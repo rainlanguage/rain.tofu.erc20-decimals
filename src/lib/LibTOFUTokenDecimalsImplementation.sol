@@ -78,7 +78,8 @@ library LibTOFUTokenDecimalsImplementation {
         }
     }
 
-    /// Trust on first use (TOFU) token decimals.
+    /// @notice As per `ITOFUTokenDecimals.decimalsForToken`. Trust on first use
+    /// (TOFU) token decimals.
     /// The first time we read the decimals from a token we store them in a
     /// mapping. If the token's decimals change we will always use the stored
     /// value. This is because the token's decimals could technically change and
@@ -121,7 +122,8 @@ library LibTOFUTokenDecimalsImplementation {
         return (tofuOutcome, readDecimals);
     }
 
-    /// Trust on first use (TOFU) token decimals.
+    /// @notice As per `ITOFUTokenDecimals.safeDecimalsForToken`. Trust on first
+    /// use (TOFU) token decimals.
     /// Same as `decimalsForToken` but reverts with `TokenDecimalsReadFailure`
     /// if the token's decimals are inconsistent or the read fails. On the
     /// first read the decimals are never considered inconsistent.
@@ -131,7 +133,6 @@ library LibTOFUTokenDecimalsImplementation {
     /// reads.
     /// @param token The token to read the decimals for.
     /// @return The token's decimals.
-    // forge-lint: disable-next-line(mixed-case-variable)
     function safeDecimalsForToken(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
@@ -144,7 +145,8 @@ library LibTOFUTokenDecimalsImplementation {
         return readDecimals;
     }
 
-    /// As per `safeDecimalsForToken` but read-only. Does not store the decimals
+    /// @notice As per `ITOFUTokenDecimals.safeDecimalsForTokenReadOnly`.
+    /// Same as `safeDecimalsForToken` but read-only. Does not store the decimals
     /// on first read. WARNING: Before initialization, each call is a fresh
     /// `Initial` read with no stored value to check against, so inconsistency
     /// between calls cannot be detected. Callers needing TOFU protection must
@@ -155,7 +157,6 @@ library LibTOFUTokenDecimalsImplementation {
     /// reads.
     /// @param token The token to read the decimals for.
     /// @return The token's decimals.
-    // forge-lint: disable-next-line(mixed-case-variable)
     function safeDecimalsForTokenReadOnly(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,

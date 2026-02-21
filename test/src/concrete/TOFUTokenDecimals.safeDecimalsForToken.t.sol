@@ -63,6 +63,27 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
         concrete.safeDecimalsForToken(token);
     }
 
+    /// A token returning a value larger than `uint8` from `decimals()` reverts
+    /// with `ReadFailure` via the `gt(readDecimals, 0xff)` guard.
+    function testSafeDecimalsForTokenOverwideDecimalsReverts(uint256 decimals) external {
+        vm.assume(decimals > 0xff);
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        concrete.safeDecimalsForToken(token);
+    }
+
+    /// A contract with code but no `decimals()` function (STOP opcode only)
+    /// reverts with `ReadFailure` via the `returndatasize < 0x20` guard.
+    function testSafeDecimalsForTokenNoDecimalsFunctionReverts() external {
+        address token = makeAddr("token");
+        vm.etch(token, hex"00");
+
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        concrete.safeDecimalsForToken(token);
+    }
+
     /// A reverting token after initialization still causes
     /// `TokenDecimalsReadFailure` with the `ReadFailure` outcome.
     function testSafeDecimalsForTokenReadFailureInitializedReverts(uint8 decimals) external {

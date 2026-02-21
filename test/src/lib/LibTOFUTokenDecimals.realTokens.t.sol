@@ -71,6 +71,40 @@ contract LibTOFUTokenDecimalsRealTokensTest is Test {
         assertEq(decimals, 18);
     }
 
+    /// decimalsForTokenReadOnly returns Initial then Consistent after
+    /// initialization via decimalsForToken.
+    function testRealTokenDecimalsForTokenReadOnly() external {
+        (TOFUOutcome outcome, uint8 decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(WETH);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Initial));
+        assertEq(decimals, 18);
+
+        LibTOFUTokenDecimals.decimalsForToken(WETH);
+
+        (outcome, decimals) = LibTOFUTokenDecimals.decimalsForTokenReadOnly(WETH);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.Consistent));
+        assertEq(decimals, 18);
+    }
+
+    /// safeDecimalsForToken succeeds on real tokens.
+    function testRealTokenSafeDecimalsForToken() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForToken(USDC);
+        assertEq(decimals, 6);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForToken(USDC);
+        assertEq(decimals, 6);
+    }
+
+    /// safeDecimalsForTokenReadOnly succeeds on real tokens.
+    function testRealTokenSafeDecimalsForTokenReadOnly() external {
+        uint8 decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(WBTC);
+        assertEq(decimals, 8);
+
+        LibTOFUTokenDecimals.decimalsForToken(WBTC);
+
+        decimals = LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(WBTC);
+        assertEq(decimals, 8);
+    }
+
     /// Cross-token isolation: initializing multiple real tokens does not
     /// cross-contaminate storage.
     function testRealTokenCrossTokenIsolation() external {
