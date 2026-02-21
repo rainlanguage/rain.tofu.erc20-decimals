@@ -30,6 +30,16 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
         assertEq(result, decimals);
     }
 
+    /// Without prior initialization, read-only safe call succeeds on the
+    /// `Initial` path and returns the freshly read decimals value.
+    function testSafeDecimalsForTokenReadOnlyInitial(uint8 decimals) external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        uint8 result = concrete.safeDecimalsForTokenReadOnly(token);
+        assertEq(result, decimals);
+    }
+
     /// After initialization with different decimals, read-only safe call
     /// reverts with `TokenDecimalsReadFailure` and the `Inconsistent` outcome.
     function testSafeDecimalsForTokenReadOnlyInconsistentReverts(uint8 decimalsA, uint8 decimalsB) external {
@@ -53,6 +63,17 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenReadOnlyTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         concrete.safeDecimalsForTokenReadOnly(token);
+    }
+
+    /// Successive calls on an uninitialized token all succeed, each
+    /// independently returning the freshly read decimals.
+    function testSafeDecimalsForTokenReadOnlyMultiCallUninitialized(uint8 decimals) external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        assertEq(concrete.safeDecimalsForTokenReadOnly(token), decimals);
+        assertEq(concrete.safeDecimalsForTokenReadOnly(token), decimals);
+        assertEq(concrete.safeDecimalsForTokenReadOnly(token), decimals);
     }
 
     /// Calling `safeDecimalsForTokenReadOnly` does not persist state; a

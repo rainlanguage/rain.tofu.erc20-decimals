@@ -62,4 +62,18 @@ contract TOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
         vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
         concrete.safeDecimalsForToken(token);
     }
+
+    /// A reverting token after initialization still causes
+    /// `TokenDecimalsReadFailure` with the `ReadFailure` outcome.
+    function testSafeDecimalsForTokenReadFailureInitializedReverts(uint8 decimals) external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        concrete.safeDecimalsForToken(token);
+
+        vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
+
+        vm.expectRevert(abi.encodeWithSelector(TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure));
+        concrete.safeDecimalsForToken(token);
+    }
 }

@@ -2,12 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {
-    ITOFUTokenDecimals,
-    TOFUTokenDecimalsResult,
-    TOFUOutcome,
-    TokenDecimalsReadFailure
-} from "../interface/ITOFUTokenDecimals.sol";
+import {TOFUTokenDecimalsResult, TOFUOutcome, TokenDecimalsReadFailure} from "../interface/ITOFUTokenDecimals.sol";
 
 /// @title LibTOFUTokenDecimalsImplementation
 /// @notice This library contains the implementation logic for reading token decimals

@@ -119,6 +119,18 @@ contract TOFUTokenDecimalsDecimalsForTokenTest is Test {
         assertEq(result, decimals);
     }
 
+    /// A contract with code but no `decimals()` function (STOP opcode only)
+    /// produces `ReadFailure`. The staticcall succeeds but returns 0 bytes,
+    /// exercising the `returndatasize < 0x20` guard.
+    function testDecimalsForTokenNoDecimalsFunction() external {
+        address token = makeAddr("token");
+        vm.etch(token, hex"00");
+
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForToken(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(result, 0);
+    }
+
     /// An `Inconsistent` outcome does not overwrite the stored value; the
     /// original decimals remain and can still produce `Consistent`.
     function testDecimalsForTokenStorageImmutableOnInconsistent(uint8 decimalsA, uint8 decimalsB) external {

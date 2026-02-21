@@ -68,6 +68,21 @@ contract TOFUTokenDecimalsDecimalsForTokenReadOnlyTest is Test {
         assertEq(result, 0);
     }
 
+    /// A reverting token produces `ReadFailure` with the stored decimals
+    /// when the token was previously initialized.
+    function testDecimalsForTokenReadOnlyReadFailureInitialized(uint8 decimals) external {
+        address token = makeAddr("token");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimals));
+
+        concrete.decimalsForToken(token);
+
+        vm.mockCallRevert(token, abi.encodeWithSelector(IERC20.decimals.selector), "");
+
+        (TOFUOutcome outcome, uint8 result) = concrete.decimalsForTokenReadOnly(token);
+        assertEq(uint256(outcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(result, decimals);
+    }
+
     /// Calling `decimalsForTokenReadOnly` does not persist state; a
     /// subsequent stateful call still sees `Initial`.
     function testDecimalsForTokenReadOnlyDoesNotWriteStorage(uint8 decimals) external {

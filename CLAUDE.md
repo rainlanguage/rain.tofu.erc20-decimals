@@ -45,6 +45,8 @@ Three layers, from lowest to highest:
 
 The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `TokenDecimalsReadFailure`) live in `src/interface/ITOFUTokenDecimals.sol`.
 
+The deploy script (`script/Deploy.sol`) uses `LibRainDeploy.deployAndBroadcastToSupportedNetworks` to deploy the `TOFUTokenDecimals` singleton via the Zoltu factory across all supported chains. It requires the `DEPLOYMENT_KEY` environment variable. CI runs it via manual `workflow_dispatch` only.
+
 ## Key Design Constraints
 
 - **Bytecode determinism is critical**: `bytecode_hash = "none"`, `cbor_metadata = false`, exact solc `=0.8.25`, `evm_version = "cancun"`, optimizer at 1M runs. Changing any of these breaks the deployed address.
