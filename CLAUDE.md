@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals. Reads `decimals()` once, stores the result, and detects inconsistency on subsequent reads. Deployed as a singleton via the Zoltu deterministic factory at `0x8b40CC241745D8eAB9396EDC12401Cfa1D5940c9` across all supported chains (Arbitrum, Base, Flare, Polygon).
+Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals. Reads `decimals()` once, stores the result, and detects inconsistency on subsequent reads. Deployed as a singleton via the Zoltu deterministic factory across all supported chains (Arbitrum, Base, Flare, Polygon).
 
 ## Build & Test Commands
 
@@ -31,7 +31,7 @@ nix develop -c rainix-sol-static
 nix develop -c rainix-sol-legal
 ```
 
-Tests require `ETH_RPC_URL` set to an Ethereum mainnet RPC endpoint. Many tests fork mainnet in their constructor via `vm.createSelectFork`.
+Tests require `ETH_RPC_URL` set to an RPC endpoint (CI uses Sepolia). Many tests fork in their constructor via `vm.createSelectFork`.
 
 ## Architecture
 
@@ -45,24 +45,27 @@ Three layers, from lowest to highest:
 
 The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `TokenDecimalsReadFailure`) live in `src/interface/ITOFUTokenDecimals.sol`.
 
+The deploy script (`script/Deploy.sol`) uses `LibRainDeploy.deployAndBroadcastToSupportedNetworks` to deploy the `TOFUTokenDecimals` singleton via the Zoltu factory across all supported chains. It requires the `DEPLOYMENT_KEY` environment variable. CI runs it via manual `workflow_dispatch` only.
+
 ## Key Design Constraints
 
-- **Bytecode determinism is critical**: `bytecode_hash = "none"`, `cbor_metadata = false`, exact solc `=0.8.25`, optimizer at 1M runs. Changing any of these breaks the deployed address.
+- **Bytecode determinism is critical**: `bytecode_hash = "none"`, `cbor_metadata = false`, exact solc `=0.8.25`, `evm_version = "cancun"`, optimizer at 1M runs. Changing any of these breaks the deployed address.
 - **`initialized` flag**: The `TOFUTokenDecimalsResult` struct uses a boolean to distinguish stored `0` decimals from uninitialized storage.
 - All `.sol` files must have the DCL-1.0 SPDX license identifier header.
 
 ## Testing Conventions
 
-- One test file per function: `ContractName.functionName.t.sol`
+- Test files follow `ContractName.functionName.t.sol` naming
 - Fuzz tests use `uint8` inputs for decimals values
 - `vm.mockCall` to mock `decimals()` return values
 - `vm.etch` with `hex"fd"` (revert opcode) to test failure paths
-- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork mainnet and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
+- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork via `ETH_RPC_URL` and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
 
 ## Dependencies
 
 Managed as git submodules:
 - `forge-std` — Foundry test framework
 - `rain.deploy` — Rain deterministic deployment utilities (Zoltu factory)
+- `rain.extrospection` — Bytecode introspection (metamorphic detection, CBOR metadata, opcode scanning)
 
 Nix flake provides the development environment; CI runs all tasks as `nix develop -c <task>`.

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-/// Encodes the token's decimals for a token. Includes a bool to indicate if
+/// @notice Encodes the token's decimals for a token. Includes a bool to indicate if
 /// the token's decimals have been read from the external contract before. This
 /// guards against the default `0` value for unset storage data being
 /// misinterpreted as a valid token decimal value `0`.
@@ -15,7 +15,7 @@ struct TOFUTokenDecimalsResult {
     uint8 tokenDecimals;
 }
 
-/// Outcomes for TOFU token decimals reads.
+/// @notice Outcomes for TOFU token decimals reads.
 enum TOFUOutcome {
     /// Token's decimals have not been read from the external contract before.
     Initial,
@@ -27,13 +27,8 @@ enum TOFUOutcome {
     ReadFailure
 }
 
-/// Thrown when a TOFU decimals safe read fails.
-/// @param token The token that failed to read decimals.
-/// @param tofuOutcome The outcome of the TOFU read.
-error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
-
 /// @title ITOFUTokenDecimals
-/// Interface for a contract that reads and stores token decimals with a trust
+/// @notice Interface for a contract that reads and stores token decimals with a trust
 /// on first use (TOFU) approach. This is used to read the decimals of ERC20
 /// tokens and store them for future use, to guard against the possibility of
 /// tokens changing their decimals after the first read.
@@ -51,30 +46,55 @@ error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
 /// to withdraw their funds but preventing further deposits or trading until the
 /// issue is resolved.
 interface ITOFUTokenDecimals {
-    /// Reads the decimals for a token in a read only manner. This does not store
+    /// @notice Thrown by safe TOFU decimals reads when the outcome is neither
+    /// `Initial` nor `Consistent`. This covers both `Inconsistent` (token
+    /// changed its decimals) and `ReadFailure` (token unreadable). The
+    /// `tofuOutcome` parameter distinguishes the two cases.
+    /// @param token The token that failed the safe read.
+    /// @param tofuOutcome The outcome of the TOFU read.
+    error TokenDecimalsReadFailure(address token, TOFUOutcome tofuOutcome);
+
+    /// @notice Reads the decimals for a token in a read-only manner. This does not store
     /// the decimals and is intended for callers to check that the decimals are
     /// either uninitialized or consistent with the stored value, without
     /// modifying state.
     /// This is relatively useless until after `decimalsForToken` has been
     /// called at least once for the token to initialize the stored decimals.
     /// The caller is advised to handle the uninitialized case appropriately
-    /// when using read only decimals.
+    /// when using read-only decimals.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
-    /// @return tokenDecimals The token's decimals.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForTokenReadOnly(address token) external view returns (TOFUOutcome, uint8);
 
-    /// Reads the decimals for a token, storing them if this is the first read.
-    /// The outcome enum needs to be handled by the caller to detect and
-    /// respond to inconsistent decimals, or other failures.
+    /// @notice Reads the decimals for a token, storing them if this is the first read.
+    /// Storage is written only on the `Initial` outcome; subsequent calls never
+    /// modify the stored value. The outcome enum needs to be handled by the
+    /// caller to detect and respond to inconsistent decimals, or other failures.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
-    /// @return tokenDecimals The token's decimals.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForToken(address token) external returns (TOFUOutcome, uint8);
 
-    /// Safely reads the decimals for a token, reverting if the read fails or
-    /// is inconsistent with the stored value.
+    /// @notice Safely reads the decimals for a token, reverting if the read
+    /// fails or is inconsistent with the stored value.
     /// @param token The token to read the decimals for.
     /// @return tokenDecimals The token's decimals.
     function safeDecimalsForToken(address token) external returns (uint8);
+
+    /// @notice Safely reads the decimals for a token in a read-only manner, reverting
+    /// if the read fails or is inconsistent with the stored value. When the
+    /// token is uninitialized (no prior `decimalsForToken` call), returns the
+    /// freshly read value without persisting it.
+    /// WARNING: Before initialization, each call is a fresh `Initial` read with
+    /// no stored value to check against, so inconsistency between calls cannot
+    /// be detected. Callers needing TOFU protection must ensure
+    /// `decimalsForToken` has been called at least once for the token.
+    /// @param token The token to read the decimals for.
+    /// @return tokenDecimals The token's decimals.
+    function safeDecimalsForTokenReadOnly(address token) external view returns (uint8);
 }

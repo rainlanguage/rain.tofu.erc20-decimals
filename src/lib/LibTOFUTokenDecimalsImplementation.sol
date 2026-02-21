@@ -2,15 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity ^0.8.25;
 
-import {
-    ITOFUTokenDecimals,
-    TOFUTokenDecimalsResult,
-    TOFUOutcome,
-    TokenDecimalsReadFailure
-} from "../interface/ITOFUTokenDecimals.sol";
+import {TOFUTokenDecimalsResult, TOFUOutcome, ITOFUTokenDecimals} from "../interface/ITOFUTokenDecimals.sol";
 
 /// @title LibTOFUTokenDecimalsImplementation
-/// This library contains the implementation logic for reading token decimals
+/// @notice This library contains the implementation logic for reading token decimals
 /// with a trust on first use (TOFU) approach. It provides functions to read
 /// token decimals, store them on first read, and check for consistency on
 /// subsequent reads. The library is designed to be used in `TOFUTokenDecimals`,
@@ -19,7 +14,7 @@ library LibTOFUTokenDecimalsImplementation {
     /// @dev The selector for the `decimals()` function in the ERC20 standard.
     bytes4 constant TOFU_DECIMALS_SELECTOR = 0x313ce567;
 
-    /// As per `ITOFUTokenDecimals.decimalsForTokenReadOnly`. Works as
+    /// @notice As per `ITOFUTokenDecimals.decimalsForTokenReadOnly`. Works as
     /// `decimalsForToken` but does not store any state, simply checking for
     /// consistency if we have a stored value.
     /// @param sTOFUTokenDecimals The storage mapping of token addresses to
@@ -28,7 +23,9 @@ library LibTOFUTokenDecimalsImplementation {
     /// reads.
     /// @param token The token to read the decimals for.
     /// @return tofuOutcome The outcome of the TOFU read.
-    /// @return tokenDecimals The token's decimals.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForTokenReadOnly(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
@@ -81,7 +78,8 @@ library LibTOFUTokenDecimalsImplementation {
         }
     }
 
-    /// Trust on first use (TOFU) token decimals.
+    /// @notice As per `ITOFUTokenDecimals.decimalsForToken`. Trust on first use
+    /// (TOFU) token decimals.
     /// The first time we read the decimals from a token we store them in a
     /// mapping. If the token's decimals change we will always use the stored
     /// value. This is because the token's decimals could technically change and
@@ -91,11 +89,23 @@ library LibTOFUTokenDecimalsImplementation {
     /// If we have nothing stored we read from the token, store and return it
     /// with TOFUOutcome.Initial.
     ///
+    /// If the stored value is consistent with the token's decimals we return
+    /// the stored value and TOFUOutcome.Consistent.
+    ///
     /// If the call to `decimals` is not a success that deserializes cleanly to
     /// a `uint8` we return the stored value and TOFUOutcome.ReadFailure.
     ///
     /// If the stored value is inconsistent with the token's decimals we return
     /// the stored value and TOFUOutcome.Inconsistent.
+    /// @param sTOFUTokenDecimals The storage mapping of token addresses to
+    /// TOFUTokenDecimalsResult structs that will be used to track the initial
+    /// reads of token decimals and allows consistency checks on subsequent
+    /// reads.
+    /// @param token The token to read the decimals for.
+    /// @return tofuOutcome The outcome of the TOFU read.
+    /// @return tokenDecimals The token's decimals. On `Initial`, the freshly
+    /// read value. On `Consistent` or `Inconsistent`, the previously stored
+    /// value. On `ReadFailure`, the stored value (zero if uninitialized).
     function decimalsForToken(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
@@ -104,29 +114,58 @@ library LibTOFUTokenDecimalsImplementation {
         internal
         returns (TOFUOutcome, uint8)
     {
-        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        (TOFUOutcome tofuOutcome, uint8 tokenDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
 
         if (tofuOutcome == TOFUOutcome.Initial) {
-            sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: readDecimals});
+            sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: tokenDecimals});
         }
-        return (tofuOutcome, readDecimals);
+        return (tofuOutcome, tokenDecimals);
     }
 
-    /// Trust on first use (TOFU) token decimals.
-    /// Same as `decimalsForToken` but reverts with a standard error if the
-    /// token's decimals are inconsistent. On the first read the decimals are
-    /// never considered inconsistent.
-    /// @return The token's decimals.
-    // forge-lint: disable-next-line(mixed-case-variable)
+    /// @notice As per `ITOFUTokenDecimals.safeDecimalsForToken`. Trust on first
+    /// use (TOFU) token decimals.
+    /// Same as `decimalsForToken` but reverts with `ITOFUTokenDecimals.TokenDecimalsReadFailure`
+    /// if the token's decimals are inconsistent or the read fails. On the
+    /// first read the decimals are never considered inconsistent.
+    /// @param sTOFUTokenDecimals The storage mapping of token addresses to
+    /// TOFUTokenDecimalsResult structs that will be used to track the initial
+    /// reads of token decimals and allows consistency checks on subsequent
+    /// reads.
+    /// @param token The token to read the decimals for.
+    /// @return tokenDecimals The token's decimals.
     function safeDecimalsForToken(
         // forge-lint: disable-next-line(mixed-case-variable)
         mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
         address token
     ) internal returns (uint8) {
-        (TOFUOutcome tofuOutcome, uint8 readDecimals) = decimalsForToken(sTOFUTokenDecimals, token);
+        (TOFUOutcome tofuOutcome, uint8 tokenDecimals) = decimalsForToken(sTOFUTokenDecimals, token);
         if (tofuOutcome != TOFUOutcome.Consistent && tofuOutcome != TOFUOutcome.Initial) {
-            revert TokenDecimalsReadFailure(token, tofuOutcome);
+            revert ITOFUTokenDecimals.TokenDecimalsReadFailure(token, tofuOutcome);
         }
-        return readDecimals;
+        return tokenDecimals;
+    }
+
+    /// @notice As per `ITOFUTokenDecimals.safeDecimalsForTokenReadOnly`.
+    /// Same as `safeDecimalsForToken` but read-only. Does not store the decimals
+    /// on first read. WARNING: Before initialization, each call is a fresh
+    /// `Initial` read with no stored value to check against, so inconsistency
+    /// between calls cannot be detected. Callers needing TOFU protection must
+    /// ensure `decimalsForToken` has been called at least once for the token.
+    /// @param sTOFUTokenDecimals The storage mapping of token addresses to
+    /// TOFUTokenDecimalsResult structs that will be used to track the initial
+    /// reads of token decimals and allows consistency checks on subsequent
+    /// reads.
+    /// @param token The token to read the decimals for.
+    /// @return tokenDecimals The token's decimals.
+    function safeDecimalsForTokenReadOnly(
+        // forge-lint: disable-next-line(mixed-case-variable)
+        mapping(address => TOFUTokenDecimalsResult) storage sTOFUTokenDecimals,
+        address token
+    ) internal view returns (uint8) {
+        (TOFUOutcome tofuOutcome, uint8 tokenDecimals) = decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        if (tofuOutcome != TOFUOutcome.Consistent && tofuOutcome != TOFUOutcome.Initial) {
+            revert ITOFUTokenDecimals.TokenDecimalsReadFailure(token, tofuOutcome);
+        }
+        return tokenDecimals;
     }
 }

@@ -28,6 +28,8 @@ fs_permissions = [
 
 remappings = [
     "rain.deploy/=lib/rain.deploy/src/",
+    "rain.extrospection/=lib/rain.extrospection/src/",
+    "rain.solmem/=lib/rain.extrospection/lib/rain.solmem/src/",
 ]
 
 [rpc_endpoints]
