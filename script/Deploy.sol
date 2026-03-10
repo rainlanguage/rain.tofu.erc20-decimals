@@ -13,13 +13,18 @@ import {LibTOFUTokenDecimals} from "../src/lib/LibTOFUTokenDecimals.sol";
 /// `DEPLOYMENT_KEY` environment variable to be set to the deployer's private
 /// key.
 contract Deploy is Script {
+    /// @notice Storage mapping for dependency code hashes, required by
+    /// `LibRainDeploy.deployAndBroadcast` to track dependency integrity
+    /// across the check and deploy phases.
+    mapping(string => mapping(address => bytes32)) internal sDepCodeHashes;
+
     /// @notice Entry point for the deploy script. Reads `DEPLOYMENT_KEY` from
     /// the environment and broadcasts the `TOFUTokenDecimals` creation code to
     /// all supported networks via `LibRainDeploy`.
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYMENT_KEY");
 
-        LibRainDeploy.deployAndBroadcastToSupportedNetworks(
+        LibRainDeploy.deployAndBroadcast(
             vm,
             LibRainDeploy.supportedNetworks(),
             deployerPrivateKey,
@@ -27,7 +32,8 @@ contract Deploy is Script {
             "src/concrete/TOFUTokenDecimals.sol:TOFUTokenDecimals",
             address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT),
             LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CODE_HASH,
-            new address[](0)
+            new address[](0),
+            sDepCodeHashes
         );
     }
 }
