@@ -12,28 +12,35 @@ import {LibTOFUTokenDecimals} from "../src/lib/LibTOFUTokenDecimals.sol";
 /// deterministic factory across all supported networks. Requires the
 /// `DEPLOYMENT_KEY` environment variable to be set to the deployer's private
 /// key.
+/// @dev Hash of the "tofu-token-decimals" deployment suite string.
+bytes32 constant DEPLOYMENT_SUITE_TOFU_TOKEN_DECIMALS = keccak256("tofu-token-decimals");
+
 contract Deploy is Script {
     /// @notice Storage mapping for dependency code hashes, required by
     /// `LibRainDeploy.deployAndBroadcast` to track dependency integrity
     /// across the check and deploy phases.
     mapping(string => mapping(address => bytes32)) internal sDepCodeHashes;
 
-    /// @notice Entry point for the deploy script. Reads `DEPLOYMENT_KEY` from
-    /// the environment and broadcasts the `TOFUTokenDecimals` creation code to
-    /// all supported networks via `LibRainDeploy`.
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYMENT_KEY");
 
-        LibRainDeploy.deployAndBroadcast(
-            vm,
-            LibRainDeploy.supportedNetworks(),
-            deployerPrivateKey,
-            type(TOFUTokenDecimals).creationCode,
-            "src/concrete/TOFUTokenDecimals.sol:TOFUTokenDecimals",
-            address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT),
-            LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CODE_HASH,
-            new address[](0),
-            sDepCodeHashes
-        );
+        bytes32 suite = keccak256(bytes(vm.envOr("DEPLOYMENT_SUITE", string("tofu-token-decimals"))));
+        if (suite == DEPLOYMENT_SUITE_TOFU_TOKEN_DECIMALS) {
+            LibRainDeploy.deployAndBroadcast(
+                vm,
+                LibRainDeploy.supportedNetworks(),
+                deployerPrivateKey,
+                type(TOFUTokenDecimals).creationCode,
+                "src/concrete/TOFUTokenDecimals.sol:TOFUTokenDecimals",
+                address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT),
+                LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CODE_HASH,
+                new address[](0),
+                sDepCodeHashes
+            );
+        } else {
+            revert(
+                "Invalid deployment suite specified. Please set the DEPLOYMENT_SUITE environment variable to 'tofu-token-decimals'."
+            );
+        }
     }
 }
