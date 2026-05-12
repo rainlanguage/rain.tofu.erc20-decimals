@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
-import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
 import {LibTOFUTokenDecimals} from "src/lib/LibTOFUTokenDecimals.sol";
 import {TOFUTokenDecimals} from "src/concrete/TOFUTokenDecimals.sol";
 import {TOFUOutcome} from "src/lib/LibTOFUTokenDecimalsImplementation.sol";
 import {ITOFUTokenDecimals} from "src/interface/ITOFUTokenDecimals.sol";
-import {IERC20} from "forge-std/interfaces/IERC20.sol";
+import {IERC20} from "forge-std-1.16.1/src/interfaces/IERC20.sol";
 
 contract LibTOFUTokenDecimalsSafeDecimalsForTokenTest is Test {
     constructor() {

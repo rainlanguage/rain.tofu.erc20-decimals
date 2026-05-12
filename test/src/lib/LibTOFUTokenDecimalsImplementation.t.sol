@@ -7,8 +7,8 @@ import {
     TOFUOutcome,
     TOFUTokenDecimalsResult
 } from "src/lib/LibTOFUTokenDecimalsImplementation.sol";
-import {Test} from "forge-std/Test.sol";
-import {IERC20} from "forge-std/interfaces/IERC20.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {IERC20} from "forge-std-1.16.1/src/interfaces/IERC20.sol";
 
 contract LibTOFUTokenDecimalsImplementationTest is Test {
     function testDecimalsSelector() external pure {
