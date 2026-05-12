@@ -11,17 +11,22 @@ import {TOFUTokenDecimals} from "src/concrete/TOFUTokenDecimals.sol";
 /// on a fork. Validates that the inline assembly `staticcall` works correctly
 /// with real-world ABI encoding, not just `vm.mockCall` mocks.
 contract LibTOFUTokenDecimalsRealTokensTest is Test {
-    /// WETH — 18 decimals.
-    address internal constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    /// USDC — 6 decimals.
-    address internal constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    /// WBTC — 8 decimals.
-    address internal constant WBTC = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
-    /// DAI — 18 decimals.
-    address internal constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    /// Arbitrum WETH — 18 decimals.
+    address internal constant WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+    /// Arbitrum native USDC — 6 decimals.
+    address internal constant USDC = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831;
+    /// Arbitrum WBTC — 8 decimals.
+    address internal constant WBTC = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f;
+    /// Arbitrum DAI — 18 decimals.
+    address internal constant DAI = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
+
+    /// Pinned for fork reproducibility. Any recent Arbitrum block where all
+    /// four contracts are deployed and stable works; bump if the RPC stops
+    /// serving this block.
+    uint256 internal constant FORK_BLOCK_NUMBER = 280_000_000;
 
     constructor() {
-        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
+        vm.createSelectFork("arbitrum", FORK_BLOCK_NUMBER);
         address deployedAddress = LibRainDeploy.deployZoltu(type(TOFUTokenDecimals).creationCode);
         assertEq(deployedAddress, address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
         LibTOFUTokenDecimals.ensureDeployed();
