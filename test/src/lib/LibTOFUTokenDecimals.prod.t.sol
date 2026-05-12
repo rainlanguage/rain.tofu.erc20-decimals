@@ -2,11 +2,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {LibTOFUTokenDecimals, TOFUOutcome} from "src/lib/LibTOFUTokenDecimals.sol";
-import {LibRainDeploy} from "rain.deploy/lib/LibRainDeploy.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
 import {TOFUTokenDecimals} from "src/concrete/TOFUTokenDecimals.sol";
-import {IERC20} from "forge-std/interfaces/IERC20.sol";
+import {IERC20} from "forge-std-1.16.1/src/interfaces/IERC20.sol";
 
 /// Verifies the TOFU singleton deployment on every supported production
 /// network. Each test forks a network and checks the deployed address,
