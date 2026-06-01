@@ -3,18 +3,18 @@
 pragma solidity =0.8.25;
 
 import {Script} from "forge-std-1.16.1/src/Script.sol";
-import {LibRainDeploy} from "rain-deploy-0.1.2/src/lib/LibRainDeploy.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.3/src/lib/LibRainDeploy.sol";
 import {TOFUTokenDecimals} from "../src/concrete/TOFUTokenDecimals.sol";
 import {LibTOFUTokenDecimals} from "../src/lib/LibTOFUTokenDecimals.sol";
+
+/// @dev Hash of the "tofu-token-decimals" deployment suite string.
+bytes32 constant DEPLOYMENT_SUITE_TOFU_TOKEN_DECIMALS = keccak256("tofu-token-decimals");
 
 /// @title Deploy
 /// @notice Deploys the `TOFUTokenDecimals` singleton via the Zoltu
 /// deterministic factory across all supported networks. Requires the
 /// `DEPLOYMENT_KEY` environment variable to be set to the deployer's private
 /// key.
-/// @dev Hash of the "tofu-token-decimals" deployment suite string.
-bytes32 constant DEPLOYMENT_SUITE_TOFU_TOKEN_DECIMALS = keccak256("tofu-token-decimals");
-
 contract Deploy is Script {
     /// @notice Storage mapping for dependency code hashes, required by
     /// `LibRainDeploy.deployAndBroadcast` to track dependency integrity

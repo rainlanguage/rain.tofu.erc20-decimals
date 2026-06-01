@@ -7,13 +7,10 @@
     rain.url = "github:rainlanguage/rain.cli";
   };
 
-  outputs = { self, flake-utils, rainix, rain }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = rainix.pkgs.${system};
-      in rec {
-        packages = rainix.packages.${system};
-        devShells = rainix.devShells.${system};
-      }
-    );
+  outputs =
+    { flake-utils, rainix, ... }:
+    flake-utils.lib.eachDefaultSystem (system: rec {
+      packages = rainix.packages.${system};
+      devShells = rainix.devShells.${system};
+    });
 }
