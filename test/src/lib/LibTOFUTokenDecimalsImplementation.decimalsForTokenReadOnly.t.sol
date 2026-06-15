@@ -65,6 +65,44 @@ contract LibTOFUTokenDecimalsImplementationDecimalsForTokenReadOnlyTest is Test 
         assertEq(readDecimals, uint8(storedDecimals));
     }
 
+    /// The uint8 fitness check rejects values strictly greater than `0xff`.
+    /// The exact boundary value `0x100` (256), one past the largest valid
+    /// uint8, must be treated as a `ReadFailure` and must not be truncated to
+    /// `uint8(0x100) == 0`. Pins the upper bound at exactly `0xff` so a
+    /// mutation loosening the check to `> 0x100` is caught.
+    function testDecimalsForTokenReadOnlyExactBoundary256(uint8 storedDecimals) external {
+        address token = makeAddr("TokenBoundary");
+        // Exactly 256: one above the uint8 max.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0x100)));
+
+        // Uninitialized: must be ReadFailure, not Initial with decimals 0.
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, 0);
+
+        // Initialized: must still be ReadFailure (returning the stored value),
+        // never Inconsistent against the truncated value.
+        sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: uint8(storedDecimals)});
+        (tofuOutcome, readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, uint8(storedDecimals));
+    }
+
+    /// The largest valid uint8 value `0xff` (255) must be accepted as a normal
+    /// read, pinning the lower edge of the rejection boundary so a mutation
+    /// tightening the check to `> 0xfe` is caught.
+    function testDecimalsForTokenReadOnlyExactBoundary255() external {
+        address token = makeAddr("TokenBoundaryMax");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0xff)));
+
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Initial));
+        assertEq(readDecimals, 0xff);
+    }
+
     function testDecimalsForTokenReadOnlyInvalidValueNotEnoughData(
         bytes memory data,
         uint256 length,

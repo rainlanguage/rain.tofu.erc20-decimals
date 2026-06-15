@@ -92,6 +92,29 @@ contract LibTOFUTokenDecimalsImplementationSafeDecimalsForTokenTest is Test {
         this.externalSafeDecimalsForToken(token);
     }
 
+    /// At exactly the boundary value `0x100` (256), one above the uint8 max,
+    /// the safe read must revert with `ReadFailure` rather than silently
+    /// accepting the truncated value `uint8(0x100) == 0`. Pins the upper bound
+    /// so a mutation loosening the check to `> 0x100` is caught.
+    function testSafeDecimalsForTokenExactBoundary256() external {
+        address token = makeAddr("TokenBoundary");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0x100)));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ITOFUTokenDecimals.TokenDecimalsReadFailure.selector, token, TOFUOutcome.ReadFailure)
+        );
+        this.externalSafeDecimalsForToken(token);
+    }
+
+    /// The largest valid uint8 value `0xff` (255) must be accepted by the safe
+    /// read and returned, pinning the lower edge of the rejection boundary.
+    function testSafeDecimalsForTokenExactBoundary255() external {
+        address token = makeAddr("TokenBoundaryMax");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0xff)));
+
+        assertEq(this.externalSafeDecimalsForToken(token), 0xff);
+    }
+
     function testSafeDecimalsForTokenInvalidValueNotEnoughDataUninitialized(bytes memory data, uint256 length)
         external
     {
