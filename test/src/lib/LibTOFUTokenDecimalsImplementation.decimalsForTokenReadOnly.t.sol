@@ -65,6 +65,40 @@ contract LibTOFUTokenDecimalsImplementationDecimalsForTokenReadOnlyTest is Test 
         assertEq(readDecimals, uint8(storedDecimals));
     }
 
+    /// `0x100` (256), the first value above the largest valid uint8 `0xff`, is
+    /// rejected as a `ReadFailure` and is not truncated to `uint8(0x100) == 0`.
+    function testDecimalsForTokenReadOnlyExactBoundary256(uint8 storedDecimals) external {
+        address token = makeAddr("TokenBoundary");
+        // Exactly 256: one above the uint8 max.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0x100)));
+
+        // Uninitialized: must be ReadFailure, not Initial with decimals 0.
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, 0);
+
+        // Initialized: must still be ReadFailure (returning the stored value),
+        // never Inconsistent against the truncated value.
+        sTOFUTokenDecimals[token] = TOFUTokenDecimalsResult({initialized: true, tokenDecimals: uint8(storedDecimals)});
+        (tofuOutcome, readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, uint8(storedDecimals));
+    }
+
+    /// The largest valid uint8 value `0xff` (255) is accepted as a normal read;
+    /// `0xff` is the maximum accepted value.
+    function testDecimalsForTokenReadOnlyExactBoundary255() external {
+        address token = makeAddr("TokenBoundaryMax");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0xff)));
+
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForTokenReadOnly(sTOFUTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Initial));
+        assertEq(readDecimals, 0xff);
+    }
+
     function testDecimalsForTokenReadOnlyInvalidValueNotEnoughData(
         bytes memory data,
         uint256 length,

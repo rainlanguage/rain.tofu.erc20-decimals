@@ -65,6 +65,43 @@ contract LibTOFUTokenDecimalsImplementationDecimalsForTokenTest is Test {
         assertEq(readDecimals, uint8(storedDecimals));
     }
 
+    /// `0x100` (256), the first value above the largest valid uint8 `0xff`, is
+    /// rejected as a `ReadFailure` and does not initialize storage with the
+    /// truncated value `uint8(0x100) == 0`.
+    function testDecimalsForTokenExactBoundary256(uint8 decimalsAfter) external {
+        address token = makeAddr("TokenBoundary");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0x100)));
+
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.ReadFailure));
+        assertEq(readDecimals, 0);
+
+        // Storage must not have been initialized by the boundary ReadFailure:
+        // a subsequent valid read returns Initial, not Consistent against 0.
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(decimalsAfter));
+        (tofuOutcome, readDecimals) = LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Initial));
+        assertEq(readDecimals, decimalsAfter);
+    }
+
+    /// The largest valid uint8 value `0xff` (255) is accepted, stored, and
+    /// returned; `0xff` is the maximum accepted value.
+    function testDecimalsForTokenExactBoundary255() external {
+        address token = makeAddr("TokenBoundaryMax");
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0xff)));
+
+        (TOFUOutcome tofuOutcome, uint8 readDecimals) =
+            LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Initial));
+        assertEq(readDecimals, 0xff);
+
+        // Re-read confirms the boundary value was actually stored.
+        (tofuOutcome, readDecimals) = LibTOFUTokenDecimalsImplementation.decimalsForToken(sTokenTokenDecimals, token);
+        assertEq(uint256(tofuOutcome), uint256(TOFUOutcome.Consistent));
+        assertEq(readDecimals, 0xff);
+    }
+
     function testDecimalsForTokenInvalidValueNotEnoughData(bytes memory data, uint256 length, uint8 storedDecimals)
         external
     {
