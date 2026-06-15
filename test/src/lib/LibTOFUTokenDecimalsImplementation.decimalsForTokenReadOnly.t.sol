@@ -65,11 +65,8 @@ contract LibTOFUTokenDecimalsImplementationDecimalsForTokenReadOnlyTest is Test 
         assertEq(readDecimals, uint8(storedDecimals));
     }
 
-    /// The uint8 fitness check rejects values strictly greater than `0xff`.
-    /// The exact boundary value `0x100` (256), one past the largest valid
-    /// uint8, must be treated as a `ReadFailure` and must not be truncated to
-    /// `uint8(0x100) == 0`. Pins the upper bound at exactly `0xff` so a
-    /// mutation loosening the check to `> 0x100` is caught.
+    /// `0x100` (256), the first value above the largest valid uint8 `0xff`, is
+    /// rejected as a `ReadFailure` and is not truncated to `uint8(0x100) == 0`.
     function testDecimalsForTokenReadOnlyExactBoundary256(uint8 storedDecimals) external {
         address token = makeAddr("TokenBoundary");
         // Exactly 256: one above the uint8 max.
@@ -90,9 +87,8 @@ contract LibTOFUTokenDecimalsImplementationDecimalsForTokenReadOnlyTest is Test 
         assertEq(readDecimals, uint8(storedDecimals));
     }
 
-    /// The largest valid uint8 value `0xff` (255) must be accepted as a normal
-    /// read, pinning the lower edge of the rejection boundary so a mutation
-    /// tightening the check to `> 0xfe` is caught.
+    /// The largest valid uint8 value `0xff` (255) is accepted as a normal read;
+    /// `0xff` is the maximum accepted value.
     function testDecimalsForTokenReadOnlyExactBoundary255() external {
         address token = makeAddr("TokenBoundaryMax");
         vm.mockCall(token, abi.encodeWithSelector(IERC20.decimals.selector), abi.encode(uint256(0xff)));
