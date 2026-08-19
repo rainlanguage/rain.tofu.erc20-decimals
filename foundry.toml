@@ -1,7 +1,3 @@
-[package]
-name = "rain-tofu-erc20-decimals"
-version = "0.1.2"
-
 [profile.default]
 src = 'src'
 out = 'out'
