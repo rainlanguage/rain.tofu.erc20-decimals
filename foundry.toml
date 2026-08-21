@@ -26,10 +26,7 @@ fs_permissions = []
 libs = ["dependencies"]
 
 # `recursive_deps` is off, so every package an import resolves through is
-# declared here. Nothing in this repo imports anything but forge-std: the
-# concrete singleton, the deploy script and the deploy-time libraries that
-# needed `rain-deploy`, `rain-extrospection` and `rain-solmem` all live in
-# rain.tofu.erc20-decimals.deploy now.
+# declared here. Nothing in this repo imports anything but forge-std.
 [dependencies]
 forge-std = "1.16.1"
 
@@ -37,8 +34,7 @@ forge-std = "1.16.1"
 recursive_deps = false
 
 # `LibTOFUTokenDecimalsProdTest` forks each of these to assert the live
-# singleton is at the pinned address with the pinned codehash. Reading the
-# deployment is a caller-side concern and stays here; deploying it does not.
+# singleton is at the pinned address with the pinned codehash.
 [rpc_endpoints]
 arbitrum = "${ARBITRUM_RPC_URL}"
 base = "${BASE_RPC_URL}"
