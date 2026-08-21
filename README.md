@@ -12,8 +12,26 @@ are used appropriately for their use case without introducing inconsistency.
 
 Repo includes:
 
-- Implementation library
-- Deterministic deployments based on Zoltu with current deployed version address
-  available as a constant, and expected codehash for integrity checking
-- Caller library for using the Zoltu deployment as though it was an internal lib
+- `ITOFUTokenDecimals`, the interface the deployed singleton implements
+- `LibTOFUTokenDecimalsImplementation`, the whole of the TOFU logic
+- `LibTOFUTokenDecimals`, a caller library that calls the Zoltu deployment as
+  though it were an internal lib, holding the deployed address as a constant and
+  the expected codehash for integrity checking
 
+## The deployment half
+
+The concrete `TOFUTokenDecimals` singleton, the deploy script and the
+deploy-pin record live in
+[`rain.tofu.erc20-decimals.deploy`](https://github.com/rainlanguage/rain.tofu.erc20-decimals.deploy),
+which imports this repo as the `rain-tofu-erc20-decimals` Soldeer package. The
+concrete is one delegation per entry point into
+`LibTOFUTokenDecimalsImplementation` and adds no behaviour of its own.
+
+Depend on `rain-tofu-erc20-decimals` for the interface, the logic, or to call
+the singleton. Depend on `rain-tofu-erc20-decimals-deploy` to deploy it or to
+pin its generated deploy record.
+
+The address and codehash constants in `LibTOFUTokenDecimals` are asserted
+against real compiler output over there, where
+`type(TOFUTokenDecimals).creationCode` exists. See
+rainlanguage/rain.tofu.erc20-decimals#29 for the split rationale.

@@ -25,25 +25,23 @@ cbor_metadata = false
 fs_permissions = []
 libs = ["dependencies"]
 
+# `recursive_deps` is off, so every package an import resolves through is
+# declared here. Nothing in this repo imports anything but forge-std: the
+# concrete singleton, the deploy script and the deploy-time libraries that
+# needed `rain-deploy`, `rain-extrospection` and `rain-solmem` all live in
+# rain.tofu.erc20-decimals.deploy now.
 [dependencies]
 forge-std = "1.16.1"
-"rain-deploy" = "0.1.3"
-"rain-extrospection" = "0.1.1"
-"rain-solmem" = "0.1.3"
 
 [soldeer]
 recursive_deps = false
 
+# `LibTOFUTokenDecimalsProdTest` forks each of these to assert the live
+# singleton is at the pinned address with the pinned codehash. Reading the
+# deployment is a caller-side concern and stays here; deploying it does not.
 [rpc_endpoints]
 arbitrum = "${ARBITRUM_RPC_URL}"
 base = "${BASE_RPC_URL}"
 base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
 flare = "${FLARE_RPC_URL}"
 polygon = "${POLYGON_RPC_URL}"
-
-[etherscan]
-arbitrum = { key = "${CI_DEPLOY_ARBITRUM_ETHERSCAN_API_KEY}" }
-base = { key = "${CI_DEPLOY_BASE_ETHERSCAN_API_KEY}" }
-base_sepolia = { key = "${CI_DEPLOY_BASE_SEPOLIA_ETHERSCAN_API_KEY}" }
-flare = { key = "${CI_DEPLOY_FLARE_ETHERSCAN_API_KEY}" }
-polygon = { key = "${CI_DEPLOY_POLYGON_ETHERSCAN_API_KEY}" }

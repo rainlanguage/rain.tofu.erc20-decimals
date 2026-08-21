@@ -2,19 +2,15 @@
 
 Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals: read `decimals()` once, store it, detect inconsistency on later reads. Deployed as a Zoltu singleton.
 
-## Fork tests use `SEPOLIA_RPC_URL`
+## The singleton is NOT built here
 
-The forking `LibTOFUTokenDecimals` suites need `SEPOLIA_RPC_URL`. (`prod.t.sol` and `realTokens.t.sol` instead use the `[rpc_endpoints]` aliases in `foundry.toml`.)
+This is the library half. The concrete `TOFUTokenDecimals`, the deploy script and the deploy-pin record live in [rain.tofu.erc20-decimals.deploy](https://github.com/rainlanguage/rain.tofu.erc20-decimals.deploy). Nothing here compiles the singleton bytecode, so this repo's compiler settings no longer move the deployed address — the deploy repo's do.
 
-Sepolia is a deliberate ruling, not a default. Those suites assert only that `deployZoltu` lands the singleton on the pinned `TOFU_DECIMALS_DEPLOYMENT` and that `ensureDeployed` finds it; every token in their bodies is a synthetic `makeAddr` with `vm.mockCall`/`vm.etch`. Nothing reads chain-specific state, and the pin is `CREATE2`-with-zero-salt from a factory whose bytecode is identical on every chain — so it is chain-independent and cannot select a network. They pass identically on Sepolia and mainnet.
+`LibTOFUTokenDecimals` still carries `TOFU_DECIMALS_DEPLOYMENT`, `TOFU_DECIMALS_EXPECTED_CODE_HASH` and `TOFU_DECIMALS_EXPECTED_CREATION_CODE`, because a caller of the singleton needs them and must not need a deploy repo to get them. They are asserted against real compiler output over there, in `test/src/lib/LibTOFUTokenDecimals.t.sol`. Never edit them here to make something pass: a mismatch means the creation code moved, which breaks every already-deployed singleton and is not recoverable by redeploying.
 
-What the assertions *do* require is that the singleton address be **vacant** on the forked chain, or `CREATE2` returns zero and `deployZoltu` reverts `DeployFailed`. That makes this a durability call: mainnet is a plausible future deploy target, and the day the singleton ships there these suites break permanently. Sepolia never will be. Do not "fix" this by pointing them at `ETHEREUM_RPC_URL`.
+## `LibTOFUTokenDecimals` is revert-path only here, deliberately
 
-This was previously `ETH_RPC_URL`, which rainix bound to the Sepolia-era `CI_DEPLOY_SEPOLIA_RPC_URL` — a name that read as mainnet, resolved to a testnet, then to an empty string, silently. Name the network explicitly (rainlanguage/rainix#340, #34).
-
-## Changing a compiler setting breaks every deployed singleton
-
-`bytecode_hash = "none"`, `cbor_metadata = false`, solc `=0.8.25`, `evm_version = "cancun"`, optimizer at 1M runs. Changing **any** of these changes the creation code, which changes the Zoltu address, which breaks every already-deployed singleton and the pinned constants in `LibTOFUTokenDecimals`. This is not recoverable by redeploying.
+Its happy paths went to the deploy repo with the concrete. `ensureDeployed` pins the codehash, so the only thing that can sit at the pinned address and be accepted is the real singleton bytecode — no `vm.etch` scaffold satisfies it. Do not "restore coverage" with a mock. `LibTOFUTokenDecimalsImplementation` is the logic and is fully covered here.
 
 ## Other rulings
 
