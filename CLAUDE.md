@@ -12,7 +12,7 @@ What the assertions *do* require is that the singleton address be **vacant** on 
 
 This was previously `ETH_RPC_URL`, which rainix bound to the Sepolia-era `CI_DEPLOY_SEPOLIA_RPC_URL` — a name that read as mainnet, resolved to a testnet, then to an empty string, silently. Name the network explicitly (rainlanguage/rainix#340, #34).
 
-## Bytecode determinism is load-bearing
+## Changing a compiler setting breaks every deployed singleton
 
 `bytecode_hash = "none"`, `cbor_metadata = false`, solc `=0.8.25`, `evm_version = "cancun"`, optimizer at 1M runs. Changing **any** of these changes the creation code, which changes the Zoltu address, which breaks every already-deployed singleton and the pinned constants in `LibTOFUTokenDecimals`. This is not recoverable by redeploying.
 
