@@ -10,7 +10,10 @@ import {IERC20} from "forge-std-1.16.1/src/interfaces/IERC20.sol";
 
 contract LibTOFUTokenDecimalsDecimalsForTokenTest is Test {
     constructor() {
-        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
+        // Sepolia, not mainnet. Nothing here reads chain-specific state; the only
+        // requirement is a live Zoltu factory plus a vacant singleton address, and
+        // mainnet is a chain the singleton may one day ship to. See CLAUDE.md.
+        vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
         address deployedAddress = LibRainDeploy.deployZoltu(type(TOFUTokenDecimals).creationCode);
         assertEq(deployedAddress, address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
 

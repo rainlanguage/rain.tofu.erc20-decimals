@@ -1,80 +1,23 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals: read `decimals()` once, store it, detect inconsistency on later reads. Deployed as a Zoltu singleton.
 
-## Project Overview
+## Fork tests use `SEPOLIA_RPC_URL`
 
-Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals. Reads `decimals()` once, stores the result, and detects inconsistency on subsequent reads. Deployed as a singleton via the Zoltu deterministic factory across all supported chains (Arbitrum, Base, Flare, Polygon).
+The forking `LibTOFUTokenDecimals` suites need `SEPOLIA_RPC_URL`. (`prod.t.sol` and `realTokens.t.sol` instead use the `[rpc_endpoints]` aliases in `foundry.toml`.)
 
-## Build & Test Commands
+Sepolia is a deliberate ruling, not a default. Those suites assert only that `deployZoltu` lands the singleton on the pinned `TOFU_DECIMALS_DEPLOYMENT` and that `ensureDeployed` finds it; every token in their bodies is a synthetic `makeAddr` with `vm.mockCall`/`vm.etch`. Nothing reads chain-specific state, and the pin is `CREATE2`-with-zero-salt from a factory whose bytecode is identical on every chain — so it is chain-independent and cannot select a network. They pass identically on Sepolia and mainnet.
 
-```bash
-# Build
-forge build
+What the assertions *do* require is that the singleton address be **vacant** on the forked chain, or `CREATE2` returns zero and `deployZoltu` reverts `DeployFailed`. That makes this a durability call: mainnet is a plausible future deploy target, and the day the singleton ships there these suites break permanently. Sepolia never will be. Do not "fix" this by pointing them at `ETHEREUM_RPC_URL`.
 
-# Run all tests (requires ETH_RPC_URL env var for fork tests)
-forge test
+This was previously `ETH_RPC_URL`, which rainix bound to the Sepolia-era `CI_DEPLOY_SEPOLIA_RPC_URL` — a name that read as mainnet, resolved to a testnet, then to an empty string, silently. Name the network explicitly (rainlanguage/rainix#340, #34).
 
-# Run a single test file
-forge test --match-path test/src/lib/LibTOFUTokenDecimals.decimalsForToken.t.sol
+## Changing a compiler setting breaks every deployed singleton
 
-# Run a single test function
-forge test --match-test testDecimalsForTokenInitial
+`bytecode_hash = "none"`, `cbor_metadata = false`, solc `=0.8.25`, `evm_version = "cancun"`, optimizer at 1M runs. Changing **any** of these changes the creation code, which changes the Zoltu address, which breaks every already-deployed singleton and the pinned constants in `LibTOFUTokenDecimals`. This is not recoverable by redeploying.
 
-# Run via Nix (matches CI exactly)
-nix develop -c rainix-sol-test
+## Other rulings
 
-# Static analysis
-nix develop -c rainix-sol-static
-
-# License/legal compliance
-nix develop -c rainix-sol-legal
-```
-
-Tests require `ETH_RPC_URL` set to an RPC endpoint (CI uses Sepolia). Many tests fork in their constructor via `vm.createSelectFork`.
-
-## Architecture
-
-Three layers, from lowest to highest:
-
-1. **`LibTOFUTokenDecimalsImplementation`** (`src/lib/`) — Core logic. Takes a `mapping(address => TOFUTokenDecimalsResult)` storage ref as parameter. Uses inline assembly with `staticcall` to read `decimals()`. Returns a `TOFUOutcome` enum (`Initial`, `Consistent`, `Inconsistent`, `ReadFailure`). Does not own storage.
-
-2. **`TOFUTokenDecimals`** (`src/concrete/`) — Minimal deployable contract. Owns the storage mapping. Delegates all logic to `LibTOFUTokenDecimalsImplementation`. Uses exact solc version (`=0.8.25`) and deterministic bytecode settings for reproducible Zoltu deployment.
-
-3. **`LibTOFUTokenDecimals`** (`src/lib/`) — Caller convenience library. Hard-codes the deployed singleton address and expected codehash. Callers import this to interact with the singleton as if it were an internal library.
-
-The interface and shared types (`TOFUTokenDecimalsResult`, `TOFUOutcome`, `TokenDecimalsReadFailure`) live in `src/interface/ITOFUTokenDecimals.sol`.
-
-The deploy script (`script/Deploy.sol`) uses `LibRainDeploy.deployAndBroadcastToSupportedNetworks` to deploy the `TOFUTokenDecimals` singleton via the Zoltu factory across all supported chains. It requires the `DEPLOYMENT_KEY` environment variable. CI runs it via manual `workflow_dispatch` only.
-
-## Key Design Constraints
-
-- **Bytecode determinism is critical**: `bytecode_hash = "none"`, `cbor_metadata = false`, exact solc `=0.8.25`, `evm_version = "cancun"`, optimizer at 1M runs. Changing any of these breaks the deployed address.
-- **`initialized` flag**: The `TOFUTokenDecimalsResult` struct uses a boolean to distinguish stored `0` decimals from uninitialized storage.
-- All `.sol` files must have the DCL-1.0 SPDX license identifier header.
-
-## Testing Conventions
-
-- Test files follow `ContractName.functionName.t.sol` naming
-- Fuzz tests use `uint8` inputs for decimals values
-- `vm.mockCall` to mock `decimals()` return values
-- `vm.etch` with `hex"fd"` (revert opcode) to test failure paths
-- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork via `ETH_RPC_URL` and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
-
-## Dependencies
-
-Managed by soldeer, never as git submodules — rainix CI runs a `no-submodules` check that fails
-the build on a committed gitlink. Versions are declared in `[dependencies]` in `foundry.toml`,
-pinned in `soldeer.lock`, and unpacked into `dependencies/` (`libs = ["dependencies"]`) by
-`forge soldeer install`, which also regenerates `remappings.txt`. Both `dependencies/` and
-`remappings.txt` are gitignored build outputs.
-
-- `forge-std` 1.16.1 — Foundry test framework
-- `rain-deploy` 0.1.3 — Rain deterministic deployment utilities (Zoltu factory)
-- `rain-extrospection` 0.1.1 — Bytecode introspection (metamorphic detection, CBOR metadata, opcode scanning)
-- `rain-solmem` 0.1.3 — Memory primitives. Not imported by this repo directly; `rain-extrospection` needs it, and `recursive_deps = false` means transitive dependencies must be declared here explicitly.
-
-Import paths carry the version, e.g. `import {Test} from "forge-std-1.16.1/src/Test.sol";`, so
-bumping a dependency means updating every import prefix that names it.
-
-Nix flake provides the development environment; CI runs all tasks as `nix develop -c <task>`.
+- `TOFUTokenDecimalsResult.initialized` is a bool specifically so a stored `0` decimals is distinguishable from uninitialized storage. Do not "optimize" it away.
+- `safeDecimalsForTokenReadOnly` cannot detect inconsistency before initialization — there is no stored value to compare against. Callers needing TOFU protection must call `decimalsForToken` at least once first.
+- All `.sol` files need the DCL-1.0 SPDX header (`reuse lint` enforces).
