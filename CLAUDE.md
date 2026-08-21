@@ -12,7 +12,7 @@ Solidity library implementing Trust On First Use (TOFU) for ERC20 token decimals
 # Build
 forge build
 
-# Run all tests (requires ETH_RPC_URL env var for fork tests)
+# Run all tests (requires SEPOLIA_RPC_URL env var for fork tests)
 forge test
 
 # Run a single test file
@@ -31,7 +31,15 @@ nix develop -c rainix-sol-static
 nix develop -c rainix-sol-legal
 ```
 
-Tests require `ETH_RPC_URL` set to an RPC endpoint (CI uses Sepolia). Many tests fork in their constructor via `vm.createSelectFork`.
+Fork tests require `SEPOLIA_RPC_URL` set to a Sepolia endpoint. Many tests fork in their constructor via `vm.createSelectFork`. `LibTOFUTokenDecimals.prod.t.sol` and `LibTOFUTokenDecimals.realTokens.t.sol` instead use the named `[rpc_endpoints]` aliases in `foundry.toml`, which read `<NETWORK>_RPC_URL`.
+
+### Why Sepolia and not mainnet
+
+The forking `LibTOFUTokenDecimals` suites assert only that `deployZoltu` places the singleton at the pinned `TOFU_DECIMALS_DEPLOYMENT` and that `ensureDeployed` then finds it; every token in their bodies is a synthetic `makeAddr` driven by `vm.mockCall`/`vm.etch`. None of them reads chain-specific state, so nothing in what they assert selects a network. Zoltu deploys via `CREATE2` with a zero salt from a factory whose bytecode is identical on every chain, so the pinned address is chain-independent by construction and cannot discriminate either.
+
+What the assertions do impose is a precondition: the singleton address must be **vacant** on the forked chain, or `CREATE2` returns zero and `deployZoltu` reverts `DeployFailed`. That makes the choice a durability question rather than a correctness one. Ethereum mainnet is a plausible future deploy target for the singleton — Rain adds supported chains periodically — and the day it ships there these suites would break permanently. Sepolia is not and will not be a production deploy target, so the precondition holds indefinitely.
+
+Historically this was `ETH_RPC_URL`, which rainix bound to the Sepolia-era `CI_DEPLOY_SEPOLIA_RPC_URL` secret: a name that read as mainnet but resolved to a testnet, and eventually to an empty string. Naming the network explicitly is what stops that drift recurring (rainlanguage/rainix#340, this repo's #34).
 
 ## Architecture
 
@@ -59,7 +67,7 @@ The deploy script (`script/Deploy.sol`) uses `LibRainDeploy.deployAndBroadcastTo
 - Fuzz tests use `uint8` inputs for decimals values
 - `vm.mockCall` to mock `decimals()` return values
 - `vm.etch` with `hex"fd"` (revert opcode) to test failure paths
-- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork via `ETH_RPC_URL` and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
+- `LibTOFUTokenDecimalsImplementation` tests use local state (no fork); most `LibTOFUTokenDecimals` tests fork via `SEPOLIA_RPC_URL` and deploy via Zoltu (pure compile-time checks like `testExpectedCreationCode` do not)
 
 ## Dependencies
 

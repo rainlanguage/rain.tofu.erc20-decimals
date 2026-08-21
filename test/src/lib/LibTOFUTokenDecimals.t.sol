@@ -31,7 +31,10 @@ contract LibTOFUTokenDecimalsTest is Test {
     }
 
     function testDeployAddress() external {
-        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
+        // Sepolia, not mainnet. Nothing here reads chain-specific state; the only
+        // requirement is a live Zoltu factory plus a vacant singleton address, and
+        // mainnet is a chain the singleton may one day ship to. See CLAUDE.md.
+        vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
         address deployedAddress = LibRainDeploy.deployZoltu(type(TOFUTokenDecimals).creationCode);
         assertEq(deployedAddress, address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
 
