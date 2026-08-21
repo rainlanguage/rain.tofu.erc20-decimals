@@ -63,9 +63,18 @@ The deploy script (`script/Deploy.sol`) uses `LibRainDeploy.deployAndBroadcastTo
 
 ## Dependencies
 
-Managed as git submodules:
-- `forge-std` — Foundry test framework
-- `rain.deploy` — Rain deterministic deployment utilities (Zoltu factory)
-- `rain.extrospection` — Bytecode introspection (metamorphic detection, CBOR metadata, opcode scanning)
+Managed by soldeer, never as git submodules — rainix CI runs a `no-submodules` check that fails
+the build on a committed gitlink. Versions are declared in `[dependencies]` in `foundry.toml`,
+pinned in `soldeer.lock`, and unpacked into `dependencies/` (`libs = ["dependencies"]`) by
+`forge soldeer install`, which also regenerates `remappings.txt`. Both `dependencies/` and
+`remappings.txt` are gitignored build outputs.
+
+- `forge-std` 1.16.1 — Foundry test framework
+- `rain-deploy` 0.1.3 — Rain deterministic deployment utilities (Zoltu factory)
+- `rain-extrospection` 0.1.1 — Bytecode introspection (metamorphic detection, CBOR metadata, opcode scanning)
+- `rain-solmem` 0.1.3 — Memory primitives. Not imported by this repo directly; `rain-extrospection` needs it, and `recursive_deps = false` means transitive dependencies must be declared here explicitly.
+
+Import paths carry the version, e.g. `import {Test} from "forge-std-1.16.1/src/Test.sol";`, so
+bumping a dependency means updating every import prefix that names it.
 
 Nix flake provides the development environment; CI runs all tasks as `nix develop -c <task>`.
