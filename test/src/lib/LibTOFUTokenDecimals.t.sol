@@ -2,13 +2,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {TOFUTokenDecimals} from "src/concrete/TOFUTokenDecimals.sol";
 import {LibTOFUTokenDecimals, TOFUOutcome} from "src/lib/LibTOFUTokenDecimals.sol";
-import {LibRainDeploy} from "rain-deploy-0.1.3/src/lib/LibRainDeploy.sol";
-import {LibExtrospectMetamorphic} from "rain-extrospection-0.1.1/src/lib/LibExtrospectMetamorphic.sol";
-import {LibExtrospectBytecode} from "rain-extrospection-0.1.1/src/lib/LibExtrospectBytecode.sol";
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 
+/// @title LibTOFUTokenDecimalsTest
+/// @notice Every `LibTOFUTokenDecimals` path that reaches the singleton with
+/// nothing usable at the pinned address: no code at all, and code with the
+/// wrong hash. These need no concrete, because what they assert is that the
+/// call is refused before it happens.
+///
+/// The happy paths are NOT here. `ensureDeployed` pins the codehash, so the
+/// only thing that satisfies it is the real singleton bytecode, which only the
+/// deploy half compiles. Those suites, and the assertions that this repo's
+/// pinned address, code hash and creation code are what that bytecode produces,
+/// live in
+/// [rain.tofu.erc20-decimals.deploy](https://github.com/rainlanguage/rain.tofu.erc20-decimals.deploy).
 contract LibTOFUTokenDecimalsTest is Test {
     function externalEnsureDeployed() external view {
         LibTOFUTokenDecimals.ensureDeployed();
@@ -28,47 +36,6 @@ contract LibTOFUTokenDecimalsTest is Test {
 
     function externalSafeDecimalsForTokenReadOnly(address token) external view returns (uint8) {
         return LibTOFUTokenDecimals.safeDecimalsForTokenReadOnly(token);
-    }
-
-    function testDeployAddress() external {
-        // Sepolia, not mainnet. Nothing here reads chain-specific state; the only
-        // requirement is a live Zoltu factory plus a vacant singleton address, and
-        // mainnet is a chain the singleton may one day ship to. See CLAUDE.md.
-        vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
-        address deployedAddress = LibRainDeploy.deployZoltu(type(TOFUTokenDecimals).creationCode);
-        assertEq(deployedAddress, address(LibTOFUTokenDecimals.TOFU_DECIMALS_DEPLOYMENT));
-
-        // Check that ensure deployed finds the contract correctly.
-        LibTOFUTokenDecimals.ensureDeployed();
-    }
-
-    /// The singleton bytecode must not contain any reachable metamorphic
-    /// opcodes (SELFDESTRUCT, DELEGATECALL, CALLCODE, CREATE, CREATE2).
-    /// This ensures the code at the singleton address cannot change after
-    /// deployment, eliminating the theoretical TOCTOU gap between
-    /// ensureDeployed() and the subsequent external call.
-    function testNotMetamorphic() external {
-        TOFUTokenDecimals singleton = new TOFUTokenDecimals();
-        LibExtrospectMetamorphic.checkNotMetamorphic(address(singleton).code);
-    }
-
-    /// The singleton must be compiled without CBOR metadata
-    /// (`cbor_metadata = false` in foundry.toml). CBOR metadata includes a
-    /// content hash of the source, which an attacker could exploit for
-    /// metamorphic-style address reuse if the factory doesn't account for it.
-    function testNoCBORMetadata() external {
-        TOFUTokenDecimals singleton = new TOFUTokenDecimals();
-        LibExtrospectBytecode.checkNoSolidityCBORMetadata(address(singleton));
-    }
-
-    function testExpectedCodeHash() external {
-        TOFUTokenDecimals tofuTokenDecimals = new TOFUTokenDecimals();
-
-        assertEq(address(tofuTokenDecimals).codehash, LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CODE_HASH);
-    }
-
-    function testExpectedCreationCode() external pure {
-        assertEq(type(TOFUTokenDecimals).creationCode, LibTOFUTokenDecimals.TOFU_DECIMALS_EXPECTED_CREATION_CODE);
     }
 
     function testEnsureDeployedRevert() external {
