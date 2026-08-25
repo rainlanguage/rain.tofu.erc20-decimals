@@ -6,13 +6,16 @@ on:
 jobs:
   release:
     # The called workflow's release job runs with `contents: write` (it pushes
-    # the version-bump commit, tags, and GitHub releases) and `id-token: write`.
-    # A called workflow can only narrow the token it is handed, never widen it,
-    # so the caller has to grant these explicitly; inheriting the repository
-    # default is not enough wherever that default is read-only.
+    # the version-bump commit, tags, and GitHub releases), `id-token: write`,
+    # and `actions: read` (its commit-CI gate reads this repo's workflow runs
+    # before publishing). A called workflow can only narrow the token it is
+    # handed, never widen it, so the caller has to grant these explicitly;
+    # inheriting the repository default is not enough wherever that default is
+    # read-only.
     permissions:
       contents: write
       id-token: write
+      actions: read
     uses: rainlanguage/rainix/.github/workflows/rainix-autopublish.yaml@main
     with:
       soldeer-package: rain-tofu-erc20-decimals
