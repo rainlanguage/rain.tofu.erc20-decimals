@@ -5,7 +5,6 @@ path = [
     ".gas-snapshot",
     ".github/**/",
     ".gitignore",
-    ".coderabbit.yaml",
     "audit/**/",
     "CLAUDE.md",
     "README.md",
